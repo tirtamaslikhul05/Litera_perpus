@@ -16,6 +16,11 @@ export default function App() {
         {/* ================= PUBLIC ROUTES ================= */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        {/*dashboard route*/}
+        <Route path="/dashboard" element={
+          <ProtectedRoute allowedRoles={['Siswa']}>
+            <Dashboard />
+          </ProtectedRoute>} />
       </Routes>
     </Router>
   );
