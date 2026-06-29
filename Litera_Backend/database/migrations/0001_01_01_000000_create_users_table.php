@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('school_id')->nullable();
+            $table->foreignId('school_id')->nullable()->constrained('schools')->onDelete('cascade');
             $table->string('email')->unique()->nullable();
             $table->string('nisn')->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
@@ -22,6 +22,9 @@ return new class extends Migration
             $table->enum('role',['admin','siswa'])->default('siswa');
             $table->rememberToken();
             $table->timestamps();
+            
+            $table->index('nisn');
+            $table->index('school_id');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

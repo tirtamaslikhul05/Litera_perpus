@@ -13,7 +13,17 @@ return new class extends Migration
     {
         Schema::create('books', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('school_id')->constrained()->onDelete('cascade');
+            $table->string('nama_buku', 255);
+            $table->string('isbn', 20);
+            $table->boolean('pdf')->default(false);
+            $table->integer('jumlah_buku')->default(0);
+            $table->integer('jumlah_pinjam')->default(0);
+            $table->integer('jumlah_tersedia')->default(0);
+            $table->string('cover', 255)->nullable();
             $table->timestamps();
+
+            $table->unique(['school_id', 'isbn']);
         });
     }
 

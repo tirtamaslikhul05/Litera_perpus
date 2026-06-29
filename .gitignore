@@ -12,6 +12,10 @@ Litera_Frontend/dist/
 Litera_Frontend/.env
 Litera_Frontend/.env.local
 
+# --- Catatan Pribadi / Rencana ---
+Helper/
+plans/
+plan/
 # --- Umum ---
 .DS_Store
 .vscode/
