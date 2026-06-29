@@ -2,45 +2,31 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasApiTokens,HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
+
     protected $fillable = [
-        'school_id',
-        'name',
-        'email',
-        'nisn',
-        'password',
-        'role',
+        'school_id', 'nisn', 'name', 'email', 'password', 'role'
     ];
 
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password', 'remember_token',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+    // Relasi
+    public function school() {
+        return $this->belongsTo(School::class);
     }
-    public function school()
-        {
-            return $this->belongsTo(School::class);
-        }
+    public function loans() {
+        return $this->hasMany(Loan::class);
+    }
+    public function fines() {
+        return $this->hasMany(Fine::class);
+    }
 }
-
