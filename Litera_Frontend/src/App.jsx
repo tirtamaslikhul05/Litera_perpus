@@ -22,6 +22,16 @@ export default function App() {
             <Dashboard />
           </ProtectedRoute>} />
       </Routes>
+
+      {/* Eksplorasi & Sirkulasi Buku */}
+        <Route 
+          path="/catalog/search" 
+          element={
+            <ProtectedRoute allowedRoles={['Siswa']}>
+              <Search />
+            </ProtectedRoute>
+          } 
+        />
     </Router>
   );
 }
