@@ -74,6 +74,20 @@ export default function App() {
             </ProtectedRoute>
           } 
         />
+
+        {/* Manajemen Akun & Kartu Anggota Digital */}
+        <Route 
+          path="/profile" 
+          element={
+            <ProtectedRoute allowedRoles={['Siswa']}>
+              <UserProfile />
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Menggunakan fungsi logika penentu peran agar tidak salah lempar halaman */}
+        <Route path="/" element={<RedirectBasedOnRole />} />
+        <Route path="*" element={<RedirectBasedOnRole />} />
     </Router>
   );
 }
