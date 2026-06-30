@@ -40,6 +40,22 @@ export default function App() {
             </ProtectedRoute>
           } 
         />
+        <Route 
+          path="/catalog/reader/:bookId" 
+          element={
+            <ProtectedRoute allowedRoles={['Siswa']}>
+              <BookReader />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/bookshelf" 
+          element={
+            <ProtectedRoute allowedRoles={['Siswa']}>
+              <Bookshelf />
+            </ProtectedRoute>
+          } 
+        />
     </Router>
   );
 }
