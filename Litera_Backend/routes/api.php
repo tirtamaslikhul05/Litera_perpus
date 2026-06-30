@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\StudentController;
+use App\Http\Controllers\Api\AdminLoanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,7 +13,7 @@ use App\Http\Controllers\Api\StudentController;
 |--------------------------------------------------------------------------
 |
 | Di sini semua endpoint API untuk autentikasi, manajemen user, manajemen buku,
-| dan manajemen siswa.
+| manajemen siswa, dan manajemen peminjaman oleh admin.
 |
 */
 
@@ -54,4 +55,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ==================== MANAJEMEN SISWA (CRUD) ====================
     Route::apiResource('/students', StudentController::class);
+
+    // ==================== ADMIN LOAN MANAGEMENT ====================
+    Route::prefix('/admin')->group(function () {
+        Route::get('/loans', [AdminLoanController::class, 'index']);
+        Route::put('/loans/{loan}/approve', [AdminLoanController::class, 'approve']);
+        Route::put('/loans/{loan}/return', [AdminLoanController::class, 'returnBook']);
+    });
 });
