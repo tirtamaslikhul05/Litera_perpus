@@ -66,6 +66,14 @@ export default function App() {
             </ProtectedRoute>
           } 
         />
+        <Route 
+          path="/fines/return-status" 
+          element={
+            <ProtectedRoute allowedRoles={['Siswa']}>
+              <ReturnStatus />
+            </ProtectedRoute>
+          } 
+        />
     </Router>
   );
 }
