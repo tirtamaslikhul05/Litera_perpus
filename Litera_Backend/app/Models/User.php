@@ -12,11 +12,16 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
-        'school_id', 'nisn', 'name', 'email', 'password', 'role'
+        'school_id', 'nisn', 'name', 'email', 'password', 'role',
+        'kelas', 'jurusan', 'foto',
     ];
 
     protected $hidden = [
         'password', 'remember_token', 'nisn',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
     ];
 
     // Relasi
@@ -28,5 +33,11 @@ class User extends Authenticatable
     }
     public function fines() {
         return $this->hasMany(Fine::class);
+    }
+
+    // Accessor: URL foto lengkap
+    public function getFotoUrlAttribute()
+    {
+        return $this->foto ? asset('storage/' . $this->foto) : null;
     }
 }

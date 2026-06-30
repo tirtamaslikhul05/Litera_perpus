@@ -4,13 +4,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookController;
+use App\Http\Controllers\Api\StudentController;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
 |
-| Di sini semua endpoint API untuk autentikasi, manajemen user, dan manajemen buku.
+| Di sini semua endpoint API untuk autentikasi, manajemen user, manajemen buku,
+| dan manajemen siswa.
 |
 */
 
@@ -49,4 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ==================== MANAJEMEN BUKU (CRUD) ====================
     Route::apiResource('/books', BookController::class);
+
+    // ==================== MANAJEMEN SISWA (CRUD) ====================
+    Route::apiResource('/students', StudentController::class);
 });

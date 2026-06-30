@@ -85,12 +85,16 @@ class AuthController extends Controller
             'name'      => 'required|string|max:255',
             'nisn'      => 'required|string|unique:users,nisn',
             'school_id' => 'required|integer|exists:schools,id',
+            'kelas'     => 'sometimes|required|string|max:50',
+            'jurusan'   => 'sometimes|required|string|max:100',
         ]);
 
         $user = User::create([
             'school_id' => $request->school_id,
             'name'      => $request->name,
             'nisn'      => $request->nisn,
+            'kelas'     => $request->kelas,
+            'jurusan'   => $request->jurusan,
             'password'  => Hash::make($request->nisn), // password default = NISN
             'role'      => 'siswa',
         ]);
