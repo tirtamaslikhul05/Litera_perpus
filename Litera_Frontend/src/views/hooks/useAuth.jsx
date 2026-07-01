@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import AuthService from '../core/services/AuthService';
+import AuthService from '../../core/services/AuthService';
 
 export default function useAuth() {
   const [loading, setLoading] = useState(false);

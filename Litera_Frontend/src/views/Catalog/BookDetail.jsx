@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import BookService from '../../core/services/BookService';
-import useFetch from '../../hooks/useFetch';
+import useFetch from '../hooks/useFetch';
 import Toast from '../../components/Feedback/Toast';
 import Loading from '../../components/Feedback/Loading';
 

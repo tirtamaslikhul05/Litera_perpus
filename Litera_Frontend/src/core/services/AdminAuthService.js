@@ -1,53 +1,79 @@
 // src/core/services/AdminAuthService.js
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import apiClient from './ApiClient';
 
 const AdminAuthService = {
-  // Service untuk Login Admin
-  login: async (email, password) => {
-    // -----------------------------------------------------------------
-    // FAKE ACCOUNT BYPASS (MOCKING FRONTEND)
-    // -----------------------------------------------------------------
-    if (email === 'admin@litera.id' && password === 'admin123') {
-      console.log('--- LOGIN ADMIN MOCK SUCCESS ---');
-      
-      // Mengembalikan struktur data yang persis sama seperti respons asli backend
-      return {
-        success: true,
-        message: 'Login Berhasil (Fake Account)',
-        token: 'mock_jwt_token_admin_litera_2026_xyz',
-        expiresIn: 7200, // Berlaku 2 jam (dalam satuan detik)
-        role: 'Admin'
-      };
-    }
-    // -----------------------------------------------------------------
-
-    // Jika inputan bukan akun tiruan di atas, sistem akan tetap mencoba menembak API backend asli
+  /**
+   * Login Admin - Full API (Tanpa Fake Account)
+   */
+  async login(email, password) {
     try {
-      const response = await axios.post(`${API_URL}/admin/login`, { email, password });
-      return response.data;
+      const response = await apiClient.post('/admin/login', { 
+        email, 
+        password 
+      });
+
+      const { token, expiresInMinutes, admin } = response.data.data || response.data;
+
+      if (!token) {
+        throw new Error('Token tidak diterima dari server');
+      }
+
+      // Simpan token admin
+      const expiryTime = Date.now() + (expiresInMinutes * 60 * 1000);
+
+      localStorage.setItem('litera_token', token);
+      localStorage.setItem('litera_token_expiry', expiryTime.toString());
+      localStorage.setItem('litera_role', 'Admin');
+
+      if (admin) {
+        localStorage.setItem('litera_user', JSON.stringify(admin));
+      }
+
+      return response.data.data || response.data;
     } catch (error) {
-      // Jika backend mati dan bukan fake account, kunci pesan errornya
-      throw new Error(error.response?.data?.message || 'Email atau Kata Sandi salah / API Offline.');
+      const message = error.response?.data?.message || 
+                     error.message || 
+                     'Email atau password admin salah.';
+      throw new Error(message);
     }
   },
 
-  // Service untuk Registrasi Admin Baru
-  register: async (adminData) => {
+  /**
+   * Register Admin Baru
+   */
+  async register(adminData) {
     try {
-      const response = await axios.post(`${API_URL}/admin/register`, adminData);
+      const response = await apiClient.post('/admin/register', adminData);
       return response.data;
     } catch (error) {
-      throw error.response?.data || new Error('Gagal melakukan registrasi admin.');
+      const message = error.response?.data?.message || 
+                     'Gagal mendaftarkan akun admin baru.';
+      throw new Error(message);
     }
   },
 
-  // Service untuk Logout Admin
-  logout: () => {
+  /**
+   * Logout Admin
+   */
+  logout() {
     localStorage.removeItem('litera_token');
     localStorage.removeItem('litera_token_expiry');
     localStorage.removeItem('litera_role');
+    localStorage.removeItem('litera_user');
+    
+    // Redirect ke halaman login admin
+    window.location.href = '/admin/login';
+  },
+
+  /**
+   * Cek apakah admin sedang login
+   */
+  isLoggedIn() {
+    const token = localStorage.getItem('litera_token');
+    const expiry = localStorage.getItem('litera_token_expiry');
+    const role = localStorage.getItem('litera_role');
+
+    return !!(token && expiry && role === 'Admin' && Date.now() < parseInt(expiry));
   }
 };
 

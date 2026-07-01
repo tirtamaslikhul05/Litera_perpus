@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import BookService from '../../core/services/BookService';
-import useFetch from '../../hooks/useFetch';
+import useFetch from '../hooks/useFetch';
 import AuthService from '../../core/services/AuthService';
 
 export default function UserProfile() {

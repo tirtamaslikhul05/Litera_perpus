@@ -1,30 +1,58 @@
 // src/core/services/AdminService.js
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/admin';
+import apiClient from './ApiClient';
 
 const AdminService = {
   // === KELOLA SISWA ===
-  getAllStudents: () => axios.get(`${API_URL}/students`),
-  addStudent: (studentData) => axios.post(`${API_URL}/students`, studentData),
-  toggleStudentStatus: (studentId) => axios.patch(`${API_URL}/students/${studentId}/toggle`),
-
-  // === PENGELOLAAN BUKU ===
-  getAllBooks: () => axios.get(`${API_URL}/books`),
-  addBook: (bookData) => {
-    // Menggunakan FormData karena UI kamu mendukung upload file Cover (Gambar) & E-Book (PDF)
-    return axios.post(`${API_URL}/books`, bookData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+  getAllStudents: async () => {
+    const response = await apiClient.get('/admin/students');
+    return response.data;
   },
 
-  // === TRANSAKSI & DENDA (PENGHUBUNG UTAMA) ===
-  processReturn: (loanId) => axios.post(`${API_URL}/loans/${loanId}/return`),
-  getDendaDetail: (transactionId) => axios.get(`${API_URL}/fines/${transactionId}`),
-  payDenda: (transactionId, nominal) => axios.post(`${API_URL}/fines/${transactionId}/pay`, { nominal }),
-  
+  addStudent: async (studentData) => {
+    const response = await apiClient.post('/admin/students', studentData);
+    return response.data;
+  },
+
+  toggleStudentStatus: async (studentId) => {
+    const response = await apiClient.patch(`/admin/students/${studentId}/toggle`);
+    return response.data;
+  },
+
+  // === PENGELOLAAN BUKU ===
+  getAllBooks: async () => {
+    const response = await apiClient.get('/admin/books');
+    return response.data;
+  },
+
+  addBook: async (bookData) => {
+    // bookData bisa berupa FormData (untuk upload cover + file PDF)
+    const response = await apiClient.post('/admin/books', bookData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+
+  // === TRANSAKSI & DENDA ===
+  processReturn: async (loanId) => {
+    const response = await apiClient.post(`/admin/loans/${loanId}/return`);
+    return response.data;
+  },
+
+  getDendaDetail: async (transactionId) => {
+    const response = await apiClient.get(`/admin/fines/${transactionId}`);
+    return response.data;
+  },
+
+  payDenda: async (transactionId, nominal) => {
+    const response = await apiClient.post(`/admin/fines/${transactionId}/pay`, { nominal });
+    return response.data;
+  },
+
   // === DASHBOARD STATS ===
-  getDashboardStats: () => axios.get(`${API_URL}/dashboard-summary`)
+  getDashboardStats: async () => {
+    const response = await apiClient.get('/admin/dashboard-summary');
+    return response.data;
+  }
 };
 
 export default AdminService;

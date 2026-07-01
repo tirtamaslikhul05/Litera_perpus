@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BookService from '../../core/services/BookService';
-import useFetch from '../../hooks/useFetch';
+import useFetch from '../hooks/useFetch';
 import Loading from '../../components/Feedback/Loading';
 
 export default function Bookshelf() {
