@@ -1,92 +1,162 @@
-// src/views/Auth/Login.jsx
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { BookOpen, LogIn, Lock, Eye, EyeOff, IdCard, ShieldCheck } from 'lucide-react';
+import AuthService from '../../core/services/AuthService';
 
 export default function Login() {
+  const navigate = useNavigate();
   const [nisn, setNisn] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-
-  const handleNisnChange = (e) => {
-    const val = e.target.value;
-    if (/^\d*$/.test(val) && val.length <= 5) {
-      setNisn(val);
-    }
-  };
+  
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    
-    if (nisn.length < 5) {
+    setError('');
+
+    // Validasi panjang karakter disesuaikan dengan placeholder di login_2.png
+    if (nisn.length !== 10) {
+      setError('NISN harus tepat berupa 10 digit angka!');
       return;
     }
 
-    setLoading(true);
+    try {
+      setIsLoading(true);
+      const res = await AuthService.login(nisn, password);
+      
+      // Mengamankan data session siswa ke LocalStorage
+      const token = res.data?.token || res.token; 
+      const expiryTimestamp = new Date().getTime() + (7200 * 1000); // 2 Jam
+
+      localStorage.setItem('litera_token', token);
+      localStorage.setItem('litera_token_expiry', expiryTimestamp.toString());
+      localStorage.setItem('litera_role', 'Siswa');
+
+      // Jika sukses, arahkan ke dashboard utama
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.message || 'Terjadi kesalahan saat masuk.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-4">
+    <div className="relative min-h-screen w-full flex flex-col items-center justify-center bg-[#f4f7fa] px-4 font-sans text-[#1e293b]">
       
-      <div className="bg-white/95 backdrop-blur-sm p-6 sm:p-10 rounded-3xl shadow-2xl w-full max-w-md border border-white/20">
-        <div className="text-center mb-8">
-          <span className="text-4xl">📚</span>
-          <h2 className="text-2xl font-bold text-slate-800 mt-2">Perpustakaan Siswa</h2>
-          <p className="text-sm text-slate-500 mt-1">Akses Buku Fisik & E-Book Terintegrasi</p>
-        </div>
+      {/* ================= IKON DI POJOK KANAN ATAS (PORTAL ADMIN) ================= */}
+      <div className="absolute top-4 right-4 group">
+        <Link
+          to="/admin/login"
+          className="flex items-center justify-center w-10 h-10 bg-white hover:bg-[#0c3966] text-gray-500 hover:text-white rounded-xl border border-gray-100 shadow-sm transition-all duration-300"
+        >
+          <ShieldCheck className="w-5 h-5" />
+        </Link>
+        {/* Tooltip Informasi saat disentuh (Hover) */}
+        <span className="absolute right-0 top-12 scale-0 transition-all rounded bg-slate-800 p-2 text-center text-[10px] font-semibold text-white group-hover:scale-100 whitespace-nowrap shadow-md pointer-events-none origin-top-right">
+          Portal Admin / Petugas
+        </span>
+      </div>
 
-        <form onSubmit={handleLogin} className="space-y-5">
-          <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">NISN Siswa</label>
-              <span className="text-[10px] font-semibold text-slate-400">{nisn.length}/5 Digit</span>
+      {/* ================= LOGO & HEADER APLIKASI ================= */}
+      <div className="flex flex-col items-center mb-6 text-center">
+        <div className="w-12 h-12 bg-[#0c3966] rounded-xl flex items-center justify-center shadow-md mb-2">
+          <BookOpen className="w-6 h-6 text-white" />
+        </div>
+        <h1 className="text-xl font-bold text-[#0c3966] tracking-wide">Litera</h1>
+        <p className="text-xs text-gray-500 font-medium mt-0.5">Sistem Perpustakaan Digital</p>
+      </div>
+
+      {/* ================= KARTU FORM LOGIN ================= */}
+      <div className="w-full max-w-[420px] bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8">
+        <h2 className="text-lg font-bold text-gray-800 mb-6 text-left">Masuk ke Litera</h2>
+
+        {/* Notifikasi Error jika validasi/API gagal */}
+        {error && (
+          <div className="mb-4 p-3 text-xs font-medium text-red-600 bg-red-50 border border-red-100 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleLogin} className="space-y-4">
+          
+          {/* Input NISN */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-700 block">NISN</label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
+                <IdCard className="w-4 h-4" />
+              </span>
+              <input
+                type="text"
+                maxLength={10}
+                value={nisn}
+                onChange={(e) => setNisn(e.target.value.replace(/\D/g, ''))} // Hanya menerima angka
+                placeholder="Masukkan 10 digit NISN"
+                className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-400 placeholder:text-xs"
+                required
+              />
             </div>
-            <input 
-              type="text" 
-              inputMode="numeric"
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition tracking-widest font-mono" 
-              placeholder="12345" 
-              value={nisn} 
-              onChange={handleNisnChange} 
-              required 
-            />
           </div>
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Password</label>
+          {/* Input Password */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center">
+              <label className="text-xs font-bold text-gray-700 block">Password</label>
+              <Link to="/forgot-password" className="text-xs font-semibold text-[#0c3966] hover:underline">
+                Lupa password?
+              </Link>
+            </div>
             <div className="relative">
-              <input 
-                type={showPassword ? "text" : "password"} 
-                className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition" 
-                placeholder="••••••••" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                required 
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
+                <Lock className="w-4 h-4" />
+              </span>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full text-sm pl-10 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-300"
+                required
               />
-              <button 
+              <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-sm leading-5 text-slate-500 hover:text-indigo-600 transition"
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors"
               >
-                {showPassword ? (
-                  <span>🙈 <span className="text-[10px] font-bold">Sembunyikan</span></span>
-                ) : (
-                  <span>👁️ <span className="text-[10px] font-bold">Lihat</span></span>
-                )}
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          <button type="submit" disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-md transition duration-200 disabled:opacity-50">
-            {loading ? 'Memvalidasi Akun...' : 'Masuk ke Aplikasi'}
+          {/* Tombol Masuk */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-[#0c3966] hover:bg-[#092a4d] text-white font-semibold text-sm py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm disabled:opacity-75 disabled:cursor-not-allowed mt-2"
+          >
+            {isLoading ? (
+              <span>Memproses...</span>
+            ) : (
+              <>
+                <span>Masuk</span>
+                <LogIn className="w-4 h-4 transform translate-y-[0.5px]" />
+              </>
+            )}
           </button>
         </form>
 
-        <p className="text-center text-xs text-slate-500 mt-6">
-          Belum mengaktivasi akun? <Link to="/register" className="text-indigo-600 font-bold hover:underline">Aktivasi Akun Baru</Link>
-        </p>
+        {/* Footer Link Registrasi */}
+        <div className="mt-8 text-center text-xs font-medium text-gray-500">
+          Belum terdaftar?{' '}
+          <Link to="/register" className="text-[#0c3966] font-bold hover:underline">
+            Registrasi di sini
+          </Link>
+        </div>
       </div>
+
     </div>
   );
 }
