@@ -64,6 +64,16 @@ export default function App() {
             </ProtectedRoute>
           } 
         />
+
+        {/* Status Administrasi Finansial & Denda */}
+        <Route 
+          path="/fines/fines-status" 
+          element={
+            <ProtectedRoute allowedRoles={['Siswa']}>
+              <FinesStatus />
+            </ProtectedRoute>
+          } 
+        />
     </Router>
   );
 }
