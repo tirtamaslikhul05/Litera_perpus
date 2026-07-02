@@ -55,6 +55,15 @@ export default function App() {
             </ProtectedRoute>
           } 
         />
+
+        <Route 
+          path="/bookshelf" 
+          element={
+            <ProtectedRoute allowedRoles={['Siswa']}>
+              <Bookshelf />
+            </ProtectedRoute>
+          } 
+        />
     </Router>
   );
 }
