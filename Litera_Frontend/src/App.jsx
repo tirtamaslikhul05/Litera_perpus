@@ -128,7 +128,33 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        {/* 2. Modul Pengelolaan Buku */}
+        <Route 
+          path="/admin/books" 
+          element={
+            <ProtectedRoute allowedRoles={['Admin']}>
+              <ManageBooks />
+            </ProtectedRoute>
+          } 
+        />
 
+        {/* 3. Modul Pengembalian Buku & Sistem Denda */}
+        <Route 
+          path="/admin/returns" 
+          element={
+            <ProtectedRoute allowedRoles={['Admin']}>
+              <BookReturns />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/fines" 
+          element={
+            <ProtectedRoute allowedRoles={['Admin']}>
+              <ManageFines />
+            </ProtectedRoute>
+          } 
+        />
 
         {/* ================= FALLBACK REDIRECTS ================= */}
         {/* Menggunakan fungsi logika penentu peran agar tidak salah lempar halaman */}
