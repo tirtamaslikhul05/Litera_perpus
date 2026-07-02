@@ -15,6 +15,7 @@ export default function ProtectedRoute({ children, allowedRoles }) {
     localStorage.removeItem('litera_role');
     return <Navigate to="/login" replace />;
   }
+<<<<<<< HEAD
 
   /*{// 2. Validasi Hak Akses (Role-Based Access Control)
   // Jika rute membutuhkan role spesifik, dan role user saat ini tidak termasuk didalamnya
@@ -24,5 +25,7 @@ export default function ProtectedRoute({ children, allowedRoles }) {
     return <Navigate to={fallbackRedirect} replace />;
   }}*/
 
+=======
+>>>>>>> register_page
   return children;
 }

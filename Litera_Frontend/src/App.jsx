@@ -6,6 +6,7 @@ import ProtectedRoute from './components/Protection/ProtectedRoute';
 
 // Import Seluruh Halaman Views (Sesuai Struktur Folder Modul)
 import Login from './views/Auth/Login';
+import Register from './views/Auth/Register';
 
 
 export default function App() {
@@ -35,4 +36,5 @@ function RedirectBasedOnRole() {
   if (!token) {
     return <Navigate to="/login" replace />;
   }
+
 }

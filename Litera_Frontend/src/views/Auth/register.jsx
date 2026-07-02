@@ -1,92 +1,203 @@
-// src/views/Auth/Register.jsx
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { BookOpen, User, IdCard, Mail, Lock, RefreshCw, ArrowRight } from 'lucide-react';
+import AuthService from '../../core/services/AuthService';
 
 export default function Register() {
-  const [nama, setNama] = useState('');
-  const [nisn, setNisn] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  
+  const [name, setName] = useState('');
+  const [nisn, setNisn] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleNisnChange = (e) => {
-    const val = e.target.value;
-    if (/^\d*$/.test(val) && val.length <= 5) {
-      setNisn(val);
-    }
-  };
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    
-    if (nisn.length < 5) {
+    setError('');
+    setSuccess('');
+
+    if (nisn.length !== 10) {
+      setError('NISN harus tepat berupa 10 digit angka!');
       return;
     }
 
-    setLoading(true);
+    if (password !== confirmPassword) {
+      setError('Konfirmasi kata sandi tidak cocok.');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      // Panggil AuthService full API (tanpa fake)
+      await AuthService.register(name, nisn, password);
+      
+      setSuccess('Registrasi berhasil! Mengalihkan ke halaman login...');
+      
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+    } catch (err) {
+      setError(err.message || 'Gagal melakukan registrasi akun baru.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-4">
-
-      <div className="bg-white p-6 sm:p-10 rounded-3xl shadow-2xl w-full max-w-md">
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-slate-800">Registrasi Akun Siswa</h2>
-          <p className="text-xs text-slate-500 mt-1">Gunakan NISN resmi dari pihak sekolah</p>
+    <div 
+      className="min-h-screen w-full flex flex-col items-center justify-center bg-[#f4f7fa] px-4 font-sans text-[#1e293b] relative overflow-y-auto py-12"
+      style={{
+        backgroundImage: `linear-gradient(rgba(244, 247, 250, 0.85), rgba(244, 247, 250, 0.85)), url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1000')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }}
+    >
+      
+      {/* Logo Header */}
+      <div className="flex flex-col items-center mb-6 text-center z-10">
+        <div className="w-12 h-12 bg-[#0c3966] rounded-xl flex items-center justify-center shadow-md mb-2">
+          <BookOpen className="w-6 h-6 text-white" />
         </div>
+        <h1 className="text-xl font-bold text-[#0c3966] tracking-wide">Litera</h1>
+        <p className="text-xs text-gray-500 font-medium mt-0.5">Sistem Perpustakaan Digital</p>
+      </div>
+
+      {/* Form Register */}
+      <div className="w-full max-w-[460px] bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] p-8 z-10">
+        <h2 className="text-lg font-bold text-gray-800 text-left">Registrasi Akun Baru</h2>
+        <p className="text-xs text-gray-500 font-medium mt-1 mb-6 leading-relaxed">
+          Lengkapi data diri Anda untuk mengakses ribuan koleksi literasi.
+        </p>
+
+        {error && (
+          <div className="mb-4 p-3 text-xs font-medium text-red-600 bg-red-50 border border-red-100 rounded-lg">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="mb-4 p-3 text-xs font-medium text-green-600 bg-green-50 border border-green-100 rounded-lg">
+            {success}
+          </div>
+        )}
 
         <form onSubmit={handleRegister} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-600 mb-1">Nama Lengkap</label>
-            <input type="text" className="w-full px-4 py-2.5 rounded-xl border text-sm focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Nama lengkap sesuai rapor" value={nama} onChange={(e) => setNama(e.target.value)} required />
-          </div>
           
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <label className="block text-xs font-bold text-slate-600">NISN</label>
-              <span className="text-[10px] font-bold text-slate-400">{nisn.length}/5</span>
-            </div>
-            <input 
-              type="text" 
-              inputMode="numeric"
-              className="w-full px-4 py-2.5 rounded-xl border text-sm font-mono tracking-widest focus:ring-2 focus:ring-emerald-500 outline-none" 
-              placeholder="Masukkan 5 digit NISN" 
-              value={nisn} 
-              onChange={handleNisnChange} // 🔥
-              required 
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-600 mb-1">Buat Password</label>
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-700 block">Nama Lengkap</label>
             <div className="relative">
-              <input 
-                type={showPassword ? "text" : "password"} // 🔥
-                className="w-full pl-4 pr-12 py-2.5 rounded-xl border text-sm focus:ring-2 focus:ring-emerald-500 outline-none" 
-                placeholder="Minimal 6 karakter" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                required 
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
+                <User className="w-4 h-4" />
+              </span>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Contoh: Ahmad Fauzan"
+                className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-400 placeholder:text-xs"
+                required
               />
-              <button 
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-emerald-600 transition text-sm"
-              >
-                {showPassword ? "🙈" : "👁️"}
-              </button>
             </div>
           </div>
 
-          <button type="submit" disabled={loading} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl shadow-md transition disabled:opacity-50">
-            {loading ? 'Mengecek Database...' : 'Daftar Akun'}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-700 block">NISN (10 Digit)</label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
+                <IdCard className="w-4 h-4" />
+              </span>
+              <input
+                type="text"
+                maxLength={10}
+                value={nisn}
+                onChange={(e) => setNisn(e.target.value.replace(/\D/g, ''))}
+                placeholder="Masukkan 10 digit NISN"
+                className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-400 placeholder:text-xs"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-700 block">Alamat Email</label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
+                <Mail className="w-4 h-4" />
+              </span>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="nama@sekolah.sch.id"
+                className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-400 placeholder:text-xs"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-700 block">Kata Sandi</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
+                  <Lock className="w-4 h-4" />
+                </span>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-300"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-700 block">Konfirmasi</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
+                  <RefreshCw className="w-4 h-4" />
+                </span>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-300"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-[#0c3966] hover:bg-[#092a4d] text-white font-semibold text-sm py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm disabled:opacity-75 disabled:cursor-not-allowed mt-2"
+          >
+            {isLoading ? (
+              <span>Mendaftarkan...</span>
+            ) : (
+              <>
+                <span>Daftar Sekarang</span>
+                <ArrowRight className="w-4 h-4 transform translate-y-[0.5px]" />
+              </>
+            )}
           </button>
         </form>
 
-        <p className="text-center text-xs text-slate-500 mt-5">
-          Sudah punya akun? <Link to="/login" className="text-emerald-600 font-bold hover:underline">Kembali ke Login</Link>
-        </p>
+        <div className="mt-8 text-center text-xs font-medium text-gray-500">
+          Sudah punya akun?{' '}
+          <Link to="/login" className="text-[#0c3966] font-bold hover:underline">
+            Masuk di sini
+          </Link>
+        </div>
       </div>
     </div>
   );

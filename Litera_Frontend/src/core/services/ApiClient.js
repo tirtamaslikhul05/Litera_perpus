@@ -1,6 +1,10 @@
 import axios from 'axios';
 
+<<<<<<< HEAD
 // Url diganti jika sudah ada
+=======
+// Ganti URL ini
+>>>>>>> register_page
 const API_BASE_URL = 'https://api.litera-sekolah.sch.id/v1';
 
 const apiClient = axios.create({
