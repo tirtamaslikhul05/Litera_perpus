@@ -16,6 +16,10 @@ export default function Login() {
     e.preventDefault();
     setError('');
 
+<<<<<<< HEAD
+=======
+    // Validasi panjang karakter disesuaikan dengan placeholder di login_2.png
+>>>>>>> origin/admin_part1
     if (nisn.length !== 10) {
       setError('NISN harus tepat berupa 10 digit angka!');
       return;
@@ -23,6 +27,7 @@ export default function Login() {
 
     try {
       setIsLoading(true);
+<<<<<<< HEAD
       
       // Panggil AuthService full API (tanpa fake)
       const result = await AuthService.login(nisn, password);
@@ -31,6 +36,20 @@ export default function Login() {
       // Langsung navigasi ke dashboard
       navigate('/dashboard');
       
+=======
+      const res = await AuthService.login(nisn, password);
+      
+      // Mengamankan data session siswa ke LocalStorage
+      const token = res.data?.token || res.token; 
+      const expiryTimestamp = new Date().getTime() + (7200 * 1000); // 2 Jam
+
+      localStorage.setItem('litera_token', token);
+      localStorage.setItem('litera_token_expiry', expiryTimestamp.toString());
+      localStorage.setItem('litera_role', 'Siswa');
+
+      // Jika sukses, arahkan ke dashboard utama
+      navigate('/dashboard');
+>>>>>>> origin/admin_part1
     } catch (err) {
       setError(err.message || 'Terjadi kesalahan saat masuk.');
     } finally {
@@ -41,7 +60,11 @@ export default function Login() {
   return (
     <div className="relative min-h-screen w-full flex flex-col items-center justify-center bg-[#f4f7fa] px-4 font-sans text-[#1e293b]">
       
+<<<<<<< HEAD
       {/* Admin Portal */}
+=======
+      {/* ================= IKON DI POJOK KANAN ATAS (PORTAL ADMIN) ================= */}
+>>>>>>> origin/admin_part1
       <div className="absolute top-4 right-4 group">
         <Link
           to="/admin/login"
@@ -49,12 +72,20 @@ export default function Login() {
         >
           <ShieldCheck className="w-5 h-5" />
         </Link>
+<<<<<<< HEAD
+=======
+        {/* Tooltip Informasi saat disentuh (Hover) */}
+>>>>>>> origin/admin_part1
         <span className="absolute right-0 top-12 scale-0 transition-all rounded bg-slate-800 p-2 text-center text-[10px] font-semibold text-white group-hover:scale-100 whitespace-nowrap shadow-md pointer-events-none origin-top-right">
           Portal Admin / Petugas
         </span>
       </div>
 
+<<<<<<< HEAD
       {/* Logo */}
+=======
+      {/* ================= LOGO & HEADER APLIKASI ================= */}
+>>>>>>> origin/admin_part1
       <div className="flex flex-col items-center mb-6 text-center">
         <div className="w-12 h-12 bg-[#0c3966] rounded-xl flex items-center justify-center shadow-md mb-2">
           <BookOpen className="w-6 h-6 text-white" />
@@ -63,10 +94,18 @@ export default function Login() {
         <p className="text-xs text-gray-500 font-medium mt-0.5">Sistem Perpustakaan Digital</p>
       </div>
 
+<<<<<<< HEAD
       {/* Form Login */}
       <div className="w-full max-w-[420px] bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8">
         <h2 className="text-lg font-bold text-gray-800 mb-6 text-left">Masuk ke Litera</h2>
 
+=======
+      {/* ================= KARTU FORM LOGIN ================= */}
+      <div className="w-full max-w-[420px] bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8">
+        <h2 className="text-lg font-bold text-gray-800 mb-6 text-left">Masuk ke Litera</h2>
+
+        {/* Notifikasi Error jika validasi/API gagal */}
+>>>>>>> origin/admin_part1
         {error && (
           <div className="mb-4 p-3 text-xs font-medium text-red-600 bg-red-50 border border-red-100 rounded-lg">
             {error}
@@ -75,6 +114,10 @@ export default function Login() {
 
         <form onSubmit={handleLogin} className="space-y-4">
           
+<<<<<<< HEAD
+=======
+          {/* Input NISN */}
+>>>>>>> origin/admin_part1
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-gray-700 block">NISN</label>
             <div className="relative">
@@ -85,7 +128,11 @@ export default function Login() {
                 type="text"
                 maxLength={10}
                 value={nisn}
+<<<<<<< HEAD
                 onChange={(e) => setNisn(e.target.value.replace(/\D/g, ''))}
+=======
+                onChange={(e) => setNisn(e.target.value.replace(/\D/g, ''))} // Hanya menerima angka
+>>>>>>> origin/admin_part1
                 placeholder="Masukkan 10 digit NISN"
                 className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-400 placeholder:text-xs"
                 required
@@ -93,6 +140,10 @@ export default function Login() {
             </div>
           </div>
 
+<<<<<<< HEAD
+=======
+          {/* Input Password */}
+>>>>>>> origin/admin_part1
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
               <label className="text-xs font-bold text-gray-700 block">Password</label>
@@ -122,6 +173,10 @@ export default function Login() {
             </div>
           </div>
 
+<<<<<<< HEAD
+=======
+          {/* Tombol Masuk */}
+>>>>>>> origin/admin_part1
           <button
             type="submit"
             disabled={isLoading}
@@ -138,6 +193,10 @@ export default function Login() {
           </button>
         </form>
 
+<<<<<<< HEAD
+=======
+        {/* Footer Link Registrasi */}
+>>>>>>> origin/admin_part1
         <div className="mt-8 text-center text-xs font-medium text-gray-500">
           Belum terdaftar?{' '}
           <Link to="/register" className="text-[#0c3966] font-bold hover:underline">
@@ -145,6 +204,7 @@ export default function Login() {
           </Link>
         </div>
       </div>
+
     </div>
   );
 }

@@ -1,17 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { BookOpen, User, IdCard, Mail, Lock, RefreshCw, ArrowRight } from 'lucide-react';
-import AuthService from '../../core/services/AuthService';
+import { BookOpen, User, Mail, Lock, RefreshCw, ArrowRight, ShieldCheck } from 'lucide-react';
+import AdminAuthService from '../../core/services/AdminAuthService';
 
-export default function Register() {
+export default function RegisterAdmin() {
   const navigate = useNavigate();
   
-<<<<<<< HEAD
-=======
-  // State form manajemen data input
->>>>>>> origin/admin_part1
+  // State manajemen data input internal Admin
   const [name, setName] = useState('');
-  const [nisn, setNisn] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -25,19 +21,7 @@ export default function Register() {
     setError('');
     setSuccess('');
 
-<<<<<<< HEAD
-=======
-    // Validasi panjang digit NISN
->>>>>>> origin/admin_part1
-    if (nisn.length !== 10) {
-      setError('NISN harus tepat berupa 10 digit angka!');
-      return;
-    }
-
-<<<<<<< HEAD
-=======
-    // Validasi kecocokan kata sandi
->>>>>>> origin/admin_part1
+    // Validasi kecocokan konfirmasi sandi
     if (password !== confirmPassword) {
       setError('Konfirmasi kata sandi tidak cocok.');
       return;
@@ -45,83 +29,64 @@ export default function Register() {
 
     try {
       setIsLoading(true);
-<<<<<<< HEAD
       
-      // Panggil AuthService full API (tanpa fake)
-      await AuthService.register(name, nisn, password);
+      // Payload terstruktur khusus Admin (Tanpa NISN)
+      const adminData = {
+        namaLengkap: name,
+        email: email,
+        password: password
+      };
+
+      await AdminAuthService.register(adminData);
       
-      setSuccess('Registrasi berhasil! Mengalihkan ke halaman login...');
-      
-=======
-      await AuthService.register(name, nisn, password, email);
-      
-      setSuccess('Registrasi berhasil! Mengalihkan ke halaman login...');
->>>>>>> origin/admin_part1
+      setSuccess('Registrasi Admin berhasil! Mengalihkan ke ruang login...');
       setTimeout(() => {
-        navigate('/login');
+        navigate('/admin/login');
       }, 2000);
     } catch (err) {
-      setError(err.message || 'Gagal melakukan registrasi akun baru.');
+      setError(err.message || err.response?.data?.message || 'Registrasi Admin gagal. Silakan coba lagi.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div 
-      className="min-h-screen w-full flex flex-col items-center justify-center bg-[#f4f7fa] px-4 font-sans text-[#1e293b] relative overflow-y-auto py-12"
-      style={{
-        backgroundImage: `linear-gradient(rgba(244, 247, 250, 0.85), rgba(244, 247, 250, 0.85)), url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1000')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center'
-      }}
-    >
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#f4f7fa] px-4 font-sans text-[#1e293b] py-12">
       
-<<<<<<< HEAD
-      {/* Logo Header */}
-=======
-      {/* ================= LOGO & HEADER APLIKASI ================= */}
->>>>>>> origin/admin_part1
-      <div className="flex flex-col items-center mb-6 text-center z-10">
+      {/* ================= LOGO & HEADER PANEL ADMIN ================= */}
+      <div className="flex flex-col items-center mb-6 text-center">
         <div className="w-12 h-12 bg-[#0c3966] rounded-xl flex items-center justify-center shadow-md mb-2">
           <BookOpen className="w-6 h-6 text-white" />
         </div>
         <h1 className="text-xl font-bold text-[#0c3966] tracking-wide">Litera</h1>
-        <p className="text-xs text-gray-500 font-medium mt-0.5">Sistem Perpustakaan Digital</p>
+        <p className="text-xs text-gray-500 font-medium mt-0.5">Sistem Manajemen Admin</p>
       </div>
 
-<<<<<<< HEAD
-      {/* Form Register */}
-=======
-      {/* ================= KARTU FORM REGISTRASI ================= */}
->>>>>>> origin/admin_part1
-      <div className="w-full max-w-[460px] bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] p-8 z-10">
-        <h2 className="text-lg font-bold text-gray-800 text-left">Registrasi Akun Baru</h2>
-        <p className="text-xs text-gray-500 font-medium mt-1 mb-6 leading-relaxed">
-          Lengkapi data diri Anda untuk mengakses ribuan koleksi literasi.
+      {/* ================= KARTU FORM REGISTRASI ADMIN ================= */}
+      <div className="w-full max-w-[460px] bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] p-8">
+        <div className="flex items-center gap-2 mb-2">
+          <ShieldCheck className="w-5 h-5 text-[#0c3966]" />
+          <h2 className="text-lg font-bold text-gray-800">Registrasi Admin Baru</h2>
+        </div>
+        <p className="text-xs text-gray-500 font-medium mb-6 leading-relaxed">
+          Buat berkas kredensial administrator Anda menggunakan alamat email resmi internal.
         </p>
 
-<<<<<<< HEAD
-=======
-        {/* Notifikasi Status Sesi */}
->>>>>>> origin/admin_part1
+        {/* Notifikasi Status Aksi */}
         {error && (
-          <div className="mb-4 p-3 text-xs font-medium text-red-600 bg-red-50 border border-red-100 rounded-lg">
+          <div className="mb-4 p-3 text-xs font-medium text-red-600 bg-red-50 border border-red-100 rounded-lg animate-fade-in">
             {error}
           </div>
         )}
         {success && (
-          <div className="mb-4 p-3 text-xs font-medium text-green-600 bg-green-50 border border-green-100 rounded-lg">
+          <div className="mb-4 p-3 text-xs font-medium text-green-600 bg-green-50 border border-green-100 rounded-lg animate-fade-in">
             {success}
           </div>
         )}
 
         <form onSubmit={handleRegister} className="space-y-4">
           
-<<<<<<< HEAD
-=======
-          {/* Input Nama Lengkap */}
->>>>>>> origin/admin_part1
+          {/* Nama Lengkap Admin */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-gray-700 block">Nama Lengkap</label>
             <div className="relative">
@@ -132,41 +97,17 @@ export default function Register() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Contoh: Ahmad Fauzan"
+                placeholder="Contoh: Ahmad Fauzan (Admin)"
                 className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-400 placeholder:text-xs"
                 required
+                disabled={isLoading}
               />
             </div>
           </div>
 
-<<<<<<< HEAD
-=======
-          {/* Input NISN */}
->>>>>>> origin/admin_part1
+          {/* Alamat Email Utama */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-700 block">NISN (10 Digit)</label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
-                <IdCard className="w-4 h-4" />
-              </span>
-              <input
-                type="text"
-                maxLength={10}
-                value={nisn}
-                onChange={(e) => setNisn(e.target.value.replace(/\D/g, ''))}
-                placeholder="Masukkan 10 digit NISN"
-                className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-400 placeholder:text-xs"
-                required
-              />
-            </div>
-          </div>
-
-<<<<<<< HEAD
-=======
-          {/* Input Alamat Email */}
->>>>>>> origin/admin_part1
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-700 block">Alamat Email</label>
+            <label className="text-xs font-bold text-gray-700 block">Alamat Email Resmi</label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
                 <Mail className="w-4 h-4" />
@@ -175,20 +116,17 @@ export default function Register() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="nama@sekolah.sch.id"
+                placeholder="admin@litera.id"
                 className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-400 placeholder:text-xs"
                 required
+                disabled={isLoading}
               />
             </div>
           </div>
 
-<<<<<<< HEAD
-          <div className="grid grid-cols-2 gap-4">
-=======
-          {/* Baris Sandi & Konfirmasi */}
+          {/* Grid Kata Sandi & Konfirmasi */}
           <div className="grid grid-cols-2 gap-4">
             {/* Input Kata Sandi */}
->>>>>>> origin/admin_part1
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-700 block">Kata Sandi</label>
               <div className="relative">
@@ -202,14 +140,12 @@ export default function Register() {
                   placeholder="••••••••"
                   className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-300"
                   required
+                  disabled={isLoading}
                 />
               </div>
             </div>
 
-<<<<<<< HEAD
-=======
             {/* Input Konfirmasi */}
->>>>>>> origin/admin_part1
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-700 block">Konfirmasi</label>
               <div className="relative">
@@ -223,38 +159,33 @@ export default function Register() {
                   placeholder="••••••••"
                   className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-300"
                   required
+                  disabled={isLoading}
                 />
               </div>
             </div>
           </div>
 
-<<<<<<< HEAD
-=======
-          {/* Tombol Akses Pendaftaran */}
->>>>>>> origin/admin_part1
+          {/* Tombol Kirim Pendaftaran */}
           <button
             type="submit"
             disabled={isLoading}
             className="w-full bg-[#0c3966] hover:bg-[#092a4d] text-white font-semibold text-sm py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm disabled:opacity-75 disabled:cursor-not-allowed mt-2"
           >
             {isLoading ? (
-              <span>Mendaftarkan...</span>
+              <span>Mendaftarkan Admin...</span>
             ) : (
               <>
-                <span>Daftar Sekarang</span>
+                <span>Daftar Sebagai Admin</span>
                 <ArrowRight className="w-4 h-4 transform translate-y-[0.5px]" />
               </>
             )}
           </button>
         </form>
 
-<<<<<<< HEAD
-=======
-        {/* Link Navigasi Kembali ke Login */}
->>>>>>> origin/admin_part1
+        {/* Footer Tautan Kembali */}
         <div className="mt-8 text-center text-xs font-medium text-gray-500">
-          Sudah punya akun?{' '}
-          <Link to="/login" className="text-[#0c3966] font-bold hover:underline">
+          Sudah memiliki akun admin?{' '}
+          <Link to="/admin/login" className="text-[#0c3966] font-bold hover:underline">
             Masuk di sini
           </Link>
         </div>

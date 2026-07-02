@@ -16,16 +16,26 @@ export default function ProtectedRoute({ children, allowedRoles }) {
     return <Navigate to="/login" replace />;
   }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
   /*{// 2. Validasi Hak Akses (Role-Based Access Control)
+=======
+
+  // 2. Validasi Hak Akses (Role-Based Access Control)
+>>>>>>> origin/admin_part1
   // Jika rute membutuhkan role spesifik, dan role user saat ini tidak termasuk didalamnya
   if (allowedRoles && !allowedRoles.includes(userRole)) {
     // Siswa dilarang masuk area Admin, Admin dilarang masuk area Siswa
     const fallbackRedirect = userRole === 'Admin' ? '/admin/books' : '/dashboard';
     return <Navigate to={fallbackRedirect} replace />;
+<<<<<<< HEAD
   }}*/
 
 =======
 >>>>>>> register_page
+=======
+  }
+
+>>>>>>> origin/admin_part1
   return children;
 }

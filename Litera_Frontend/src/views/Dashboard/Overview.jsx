@@ -1,7 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BookService from '../../core/services/BookService';
+<<<<<<< HEAD
 import useFetch from '../../hooks/useFetch';
+=======
+import useFetch from '../hooks/useFetch';
+>>>>>>> origin/admin_part1
 
 export default function Overview() {
   const navigate = useNavigate();
@@ -12,8 +16,18 @@ export default function Overview() {
 
   // 1. Ambil data profil user dari API
   const { data: user, loading: userLoading } = useFetch(() => BookService.getUserProfileComplete());
+<<<<<<< HEAD
   const { data: allBooks = [], loading: booksLoading } = useFetch(() => BookService.getAllBooks(), []);
 
+=======
+
+  // 2. AMBIL SEMUA DATA BUKU DARI BACKEND/SERVICE SECARA NYATA
+  // Kita berikan fallback array kosong [] agar tidak pecah saat loading
+  const { data: allBooksData, loading: booksLoading } = useFetch(() => BookService.getAllBooks(), []);
+  
+  // Ambil data array buku yang asli
+  const allBooks = allBooksData?.books || allBooksData || [];
+>>>>>>> origin/admin_part1
 
   // ================= LOGIKA REKOMENDASI PINTAR DARI DATA UTAMA =================
   const recommendedBooks = useMemo(() => {
@@ -114,10 +128,14 @@ export default function Overview() {
       <nav className="w-full bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-sm">
         <span className="text-xl font-bold text-[#0c3966] tracking-wide">Litera</span>
         <div className="flex items-center gap-4">
+<<<<<<< HEAD
           <button className="p-2 text-gray-500 hover:text-gray-700 transition-colors relative bg-transparent border-none cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
+=======
+          
+>>>>>>> origin/admin_part1
           <button onClick={() => navigate('/profile')} className="p-1 rounded-full border border-gray-200 text-gray-600 flex items-center bg-transparent cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </button>

@@ -1,10 +1,14 @@
 import axios from 'axios';
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // Url diganti jika sudah ada
 =======
 // Ganti URL ini
 >>>>>>> register_page
+=======
+// Ganti URL ini dengan alamat API Backend Anda (Development / Production)
+>>>>>>> origin/admin_part1
 const API_BASE_URL = 'https://api.litera-sekolah.sch.id/v1';
 
 const apiClient = axios.create({

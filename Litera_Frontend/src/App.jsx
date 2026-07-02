@@ -7,6 +7,23 @@ import ProtectedRoute from './components/Protection/ProtectedRoute';
 // Import Seluruh Halaman Views (Sesuai Struktur Folder Modul)
 import Login from './views/Auth/Login';
 import Register from './views/Auth/Register';
+import Overview from './views/Dashboard/Overview';
+import Search from './views/Catalog/Search';
+import Bookshelf from './views/Catalog/Bookshelf';
+import BookDetail from './views/Catalog/BookDetail';
+import BookReader from './views/Catalog/BookReader';
+import FinesStatus from './views/Fines/FineStatus';
+import ReturnStatus from './views/Fines/ReturnStatus';
+import UserProfile from './views/Profile/UserProfile';
+
+// Admin Views
+import LoginAdmin from './views/Admin/LoginAdmin';
+import RegisterAdmin from './views/Admin/RegisterAdmin';
+import DashboardAdmin from './views/Admin/DashboardAdmin';
+import ManageBooks from './views/Admin/ManageBooks';
+import ManageStudents from './views/Admin/ManageStudents';
+import BookReturns from './views/Admin/BookReturns';
+import ManageFines from './views/Admin/ManageFines';
 
 
 export default function App() {
@@ -15,22 +32,22 @@ export default function App() {
       <Routes>
         {/* ================= PUBLIC ROUTES ================= */}
         <Route path="/login" element={<Login />} />
+        <Route path="/admin/login" element={<LoginAdmin />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/admin/register" element={<RegisterAdmin />} />
 
-        {/*dashboard route*/}
-        <Route path="/dashboard" element={
-          <ProtectedRoute allowedRoles={['Siswa']}>
-            <Dashboard />
-          </ProtectedRoute>} />
-          
-        {/* ================= FALLBACK REDIRECTS ================= */}
-        {/* Menggunakan fungsi logika penentu peran agar tidak salah lempar halaman */}
-        <Route path="/" element={<RedirectBasedOnRole />} />
-        <Route path="*" element={<RedirectBasedOnRole />} />
+        {/* ================= PROTECTED ROUTES (SISWA) ================= */}
+        {/* Beranda Utama Aplikasi */}
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute allowedRoles={['Siswa']}>
+              <Overview />
+            </ProtectedRoute>
+          } 
+        />
 
-      </Routes>
-
-      {/* Eksplorasi & Sirkulasi Buku */}
+        {/* Eksplorasi & Sirkulasi Buku */}
         <Route 
           path="/catalog/search" 
           element={
@@ -55,7 +72,6 @@ export default function App() {
             </ProtectedRoute>
           } 
         />
-
         <Route 
           path="/bookshelf" 
           element={
@@ -93,9 +109,32 @@ export default function App() {
           } 
         />
 
+        {/* ================= PROTECTED ROUTES (ADMIN) ================= */}
+        {/* 1. Modul Kelola & Tambah Siswa */}
+        <Route 
+          path="/admin/students" 
+          element={
+            <ProtectedRoute allowedRoles={['Admin']}>
+              <ManageStudents />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['Admin']}>
+              <DashboardAdmin />
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* ================= FALLBACK REDIRECTS ================= */}
         {/* Menggunakan fungsi logika penentu peran agar tidak salah lempar halaman */}
         <Route path="/" element={<RedirectBasedOnRole />} />
         <Route path="*" element={<RedirectBasedOnRole />} />
+      </Routes>
     </Router>
   );
 }
@@ -109,4 +148,7 @@ function RedirectBasedOnRole() {
     return <Navigate to="/login" replace />;
   }
 
+  return userRole === 'Admin' 
+    ? <Navigate to="/admin/dashboard" replace />
+    : <Navigate to="" replace />;
 }
