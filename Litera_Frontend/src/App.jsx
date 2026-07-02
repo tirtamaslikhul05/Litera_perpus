@@ -47,6 +47,14 @@ export default function App() {
             </ProtectedRoute>
           } 
         />
+        <Route 
+          path="/catalog/reader/:bookId" 
+          element={
+            <ProtectedRoute allowedRoles={['Siswa']}>
+              <BookReader />
+            </ProtectedRoute>
+          } 
+        />
     </Router>
   );
 }
