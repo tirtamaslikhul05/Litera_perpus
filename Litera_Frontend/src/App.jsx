@@ -17,7 +17,12 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-
+        {/*dashboard route*/}
+        <Route path="/dashboard" element={
+          <ProtectedRoute allowedRoles={['Siswa']}>
+            <Dashboard />
+          </ProtectedRoute>} />
+          
         {/* ================= FALLBACK REDIRECTS ================= */}
         {/* Menggunakan fungsi logika penentu peran agar tidak salah lempar halaman */}
         <Route path="/" element={<RedirectBasedOnRole />} />
