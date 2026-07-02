@@ -29,6 +29,16 @@ export default function App() {
         <Route path="*" element={<RedirectBasedOnRole />} />
 
       </Routes>
+
+      {/* Eksplorasi & Sirkulasi Buku */}
+        <Route 
+          path="/catalog/search" 
+          element={
+            <ProtectedRoute allowedRoles={['Siswa']}>
+              <Search />
+            </ProtectedRoute>
+          } 
+        />
     </Router>
   );
 }
