@@ -1,41 +1,56 @@
-import React from 'react';
+// src/components/Protection/ProtectedRoute.jsx
+import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import AuthService from '../../services/AuthService';
 
 export default function ProtectedRoute({ children, allowedRoles }) {
-  const token = localStorage.getItem('litera_token');
-  const tokenExpiry = localStorage.getItem('litera_token_expiry');
-  const userRole = localStorage.getItem('litera_role'); // Menyimpan 'Admin' atau 'Siswa'
-  const now = new Date().getTime();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [redirectPath, setRedirectPath] = useState('/login');
 
-  // 1. Validasi keberadaan token dan cek apakah token expired
-  if (!token || !tokenExpiry || now > parseInt(tokenExpiry)) {
-    // Sesi habis atau tidak valid, bersihkan sisa penyimpanan lokal
-    localStorage.removeItem('litera_token');
-    localStorage.removeItem('litera_token_expiry');
-    localStorage.removeItem('litera_role');
-    return <Navigate to="/login" replace />;
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('litera_token');
+      const role = localStorage.getItem('litera_role');
+
+      if (!token) {
+        setRedirectPath('/login');
+        setIsAuthorized(false);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        // Optional: Validasi ke server
+        // const roleRes = await AuthService.getCurrentRole(); 
+
+        if (allowedRoles && !allowedRoles.includes(role)) {
+          // Redirect sesuai role
+          setRedirectPath(role === 'Admin' ? '/admin/dashboard' : '/dashboard');
+          setIsAuthorized(false);
+        } else {
+          setIsAuthorized(true);
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        localStorage.clear();
+        setRedirectPath('/login');
+        setIsAuthorized(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, [allowedRoles]);
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-  /*{// 2. Validasi Hak Akses (Role-Based Access Control)
-=======
-
-  // 2. Validasi Hak Akses (Role-Based Access Control)
->>>>>>> origin/admin_part1
-  // Jika rute membutuhkan role spesifik, dan role user saat ini tidak termasuk didalamnya
-  if (allowedRoles && !allowedRoles.includes(userRole)) {
-    // Siswa dilarang masuk area Admin, Admin dilarang masuk area Siswa
-    const fallbackRedirect = userRole === 'Admin' ? '/admin/books' : '/dashboard';
-    return <Navigate to={fallbackRedirect} replace />;
-<<<<<<< HEAD
-  }}*/
-
-=======
->>>>>>> register_page
-=======
+  if (!isAuthorized) {
+    return <Navigate to={redirectPath} replace />;
   }
 
->>>>>>> origin/admin_part1
   return children;
 }

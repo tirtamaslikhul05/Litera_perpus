@@ -176,5 +176,5 @@ function RedirectBasedOnRole() {
 
   return userRole === 'Admin' 
     ? <Navigate to="/admin/dashboard" replace />
-    : <Navigate to="" replace />;
+    : <Navigate to="/dashboard" replace />;
 }

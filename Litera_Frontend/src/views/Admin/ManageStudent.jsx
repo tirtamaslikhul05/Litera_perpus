@@ -1,3 +1,4 @@
+// src/views/Admin/ManageStudents.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -8,7 +9,8 @@ import {
   Wallet, 
   LogOut 
 } from 'lucide-react';
-import AdminService from '../../core/services/AdminService';
+import AdminService from '../../services/AdminService';
+import AuthService from '../../services/AuthService';
 import AddStudentModal from './AddStudentModal';
 
 export default function ManageStudents() {
@@ -20,18 +22,17 @@ export default function ManageStudents() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Fetch data siswa
   const fetchStudents = async () => {
     try {
       setLoading(true);
       setError('');
       
-      const response = await AdminService.getAllStudents();
-      // Sesuaikan dengan struktur response API (bisa response.data atau langsung array)
-      setStudents(Array.isArray(response?.data) ? response.data : response || []);
+      const response = await AdminService.getAllStudents({});
+      setStudents(response.data || response || []);
     } catch (err) {
       console.error(err);
       setError('Gagal memuat data siswa.');
+      setStudents([]);
     } finally {
       setLoading(false);
     }
@@ -60,13 +61,14 @@ export default function ManageStudents() {
   };
 
   const handleLogout = () => {
-    localStorage.clear();
-    navigate('/admin/login');
+    if (window.confirm('Keluar dari sesi admin?')) {
+      AuthService.logout();
+      navigate('/admin/login');
+    }
   };
 
-  // Filter siswa
   const filteredStudents = students.filter(student => {
-    const nama = (student.namaLengkap || '').toLowerCase();
+    const nama = (student.name || student.namaLengkap || '').toLowerCase();
     const nisn = (student.nisn || '').toString();
     return nama.includes(searchTerm.toLowerCase()) || nisn.includes(searchTerm);
   });
@@ -74,53 +76,52 @@ export default function ManageStudents() {
   return (
     <div className="min-h-screen bg-[#f8fafc] font-sans flex text-slate-800">
       
-      {/* SIDEBAR */}
+      {/* Sidebar */}
       <aside className="w-64 bg-[#02244d] text-white flex flex-col justify-between shrink-0 shadow-xl">
         <div>
           <div className="p-6 border-b border-white/5">
-            <h1 className="text-lg font-black tracking-wider">LITERA PERPUSTAKAAN</h1>
-            <span className="text-[10px] text-slate-400 font-semibold mt-1 block">Admin Suite</span>
+            <h1 className="text-lg font-black tracking-wider">LITERA</h1>
+            <span className="text-xs text-slate-400">Admin Panel</span>
           </div>
 
           <nav className="p-4 space-y-1">
             <button onClick={() => navigate('/admin/dashboard')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all text-left">
               <LayoutDashboard className="w-4 h-4" />
-              <span>Dashboard Overview</span>
+              Dashboard
             </button>
             <button onClick={() => navigate('/admin/books')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all text-left">
               <BookOpen className="w-4 h-4" />
-              <span>Pengelolaan Buku</span>
+              Kelola Buku
             </button>
-            <button onClick={() => navigate('/admin/students')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold bg-[#2563eb] text-white transition-all text-left">
+            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold bg-[#2563eb] text-white transition-all text-left">
               <Users className="w-4 h-4" />
-              <span>Data Anggota</span>
+              Kelola Siswa
             </button>
             <button onClick={() => navigate('/admin/returns')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all text-left">
               <BookMarked className="w-4 h-4" />
-              <span>Sirkulasi Pengembalian</span>
+              Pengembalian
             </button>
             <button onClick={() => navigate('/admin/fines')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all text-left">
               <Wallet className="w-4 h-4" />
-              <span>Pembayaran Denda</span>
+              Denda
             </button>
           </nav>
         </div>
 
         <div className="p-4 border-t border-white/5">
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-white/5 transition-all text-left">
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-red-400 hover:text-red-300 hover:bg-white/5 transition-all text-left">
             <LogOut className="w-4 h-4" />
-            <span>Logout Sesi</span>
+            Logout
           </button>
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
-      <div className="flex-1 p-8 space-y-6 overflow-y-auto">
-        
+      {/* Main Content */}
+      <div className="flex-1 p-8 space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Kelola Data Siswa</h2>
-            <p className="text-sm text-slate-500">Manajemen akun dan status keanggotaan siswa</p>
+            <h2 className="text-2xl font-bold text-slate-900">Kelola Data Siswa</h2>
+            <p className="text-sm text-slate-500">Manajemen akun siswa perpustakaan</p>
           </div>
           <button 
             onClick={() => setIsModalOpen(true)}
@@ -132,16 +133,13 @@ export default function ManageStudents() {
 
         {/* Search */}
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm max-w-md">
-          <div className="relative">
-            <span className="absolute left-4 top-3 text-slate-400">🔍</span>
-            <input 
-              type="text" 
-              placeholder="Cari nama atau NISN..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-50 pl-11 pr-4 py-3 border border-transparent rounded-xl text-sm focus:outline-none focus:bg-white focus:border-slate-200"
-            />
-          </div>
+          <input 
+            type="text" 
+            placeholder="Cari nama atau NISN..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-slate-50 pl-4 pr-4 py-3 border border-transparent rounded-xl text-sm focus:outline-none focus:bg-white focus:border-slate-200"
+          />
         </div>
 
         {/* Tabel Siswa */}
@@ -155,8 +153,8 @@ export default function ManageStudents() {
                   <tr>
                     <th className="p-5">NAMA LENGKAP</th>
                     <th className="p-5">NISN</th>
-                    <th className="p-5">EMAIL</th>
-                    <th className="p-5">BERGABUNG</th>
+                    <th className="p-5">KELAS</th>
+                    <th className="p-5">JURUSAN</th>
                     <th className="p-5">STATUS</th>
                     <th className="p-5 text-center">AKSI</th>
                   </tr>
@@ -169,22 +167,15 @@ export default function ManageStudents() {
                   ) : (
                     filteredStudents.map((student) => (
                       <tr key={student.id} className="hover:bg-slate-50">
-                        <td className="p-5 flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold flex items-center justify-center text-xs">
-                            {(student.namaLengkap || '??').substring(0, 2).toUpperCase()}
-                          </div>
-                          <span className="font-semibold">{student.namaLengkap}</span>
-                        </td>
+                        <td className="p-5 font-semibold">{student.name}</td>
                         <td className="p-5 font-mono text-slate-600">{student.nisn}</td>
-                        <td className="p-5 text-slate-500">{student.email}</td>
-                        <td className="p-5 text-slate-400 text-sm">{student.tanggalBergabung}</td>
+                        <td className="p-5">{student.kelas}</td>
+                        <td className="p-5">{student.jurusan}</td>
                         <td className="p-5">
                           <span className={`inline-block px-3 py-1 text-xs font-bold rounded-full ${
-                            student.status === 'Aktif' 
-                              ? 'bg-emerald-100 text-emerald-700' 
-                              : 'bg-rose-100 text-rose-700'
+                            student.status === 'Aktif' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
                           }`}>
-                            {student.status}
+                            {student.status || 'Aktif'}
                           </span>
                         </td>
                         <td className="p-5 text-center">

@@ -1,14 +1,17 @@
+// src/views/Auth/Login.jsx
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { BookOpen, LogIn, Lock, Eye, EyeOff, IdCard, ShieldCheck } from 'lucide-react';
-import AuthService from '../../core/services/AuthService';
+import AuthService from '../core/services/AuthService';
+import useAuth from '../../hooks/useAuth';   // optional, jika pakai custom hook
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login, loading: authLoading } = useAuth(); // atau langsung pakai AuthService
+
   const [nisn, setNisn] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -16,42 +19,27 @@ export default function Login() {
     e.preventDefault();
     setError('');
 
-<<<<<<< HEAD
-=======
-    // Validasi panjang karakter disesuaikan dengan placeholder di login_2.png
->>>>>>> origin/admin_part1
     if (nisn.length !== 10) {
-      setError('NISN harus tepat berupa 10 digit angka!');
+      setError('NISN harus tepat 10 digit angka!');
       return;
     }
 
     try {
       setIsLoading(true);
-<<<<<<< HEAD
       
-      // Panggil AuthService full API (tanpa fake)
-      const result = await AuthService.login(nisn, password);
+      await AuthService.login(nisn, password);   // pakai service baru
       
-      // Tidak perlu set token manual lagi (sudah dilakukan di AuthService)
-      // Langsung navigasi ke dashboard
-      navigate('/dashboard');
+      const role = AuthService.getRole();
       
-=======
-      const res = await AuthService.login(nisn, password);
+      // Redirect berdasarkan role
+      if (role === 'Admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
       
-      // Mengamankan data session siswa ke LocalStorage
-      const token = res.data?.token || res.token; 
-      const expiryTimestamp = new Date().getTime() + (7200 * 1000); // 2 Jam
-
-      localStorage.setItem('litera_token', token);
-      localStorage.setItem('litera_token_expiry', expiryTimestamp.toString());
-      localStorage.setItem('litera_role', 'Siswa');
-
-      // Jika sukses, arahkan ke dashboard utama
-      navigate('/dashboard');
->>>>>>> origin/admin_part1
     } catch (err) {
-      setError(err.message || 'Terjadi kesalahan saat masuk.');
+      setError(err.message || 'NISN atau password salah.');
     } finally {
       setIsLoading(false);
     }
@@ -60,32 +48,12 @@ export default function Login() {
   return (
     <div className="relative min-h-screen w-full flex flex-col items-center justify-center bg-[#f4f7fa] px-4 font-sans text-[#1e293b]">
       
-<<<<<<< HEAD
-      {/* Admin Portal */}
-=======
-      {/* ================= IKON DI POJOK KANAN ATAS (PORTAL ADMIN) ================= */}
->>>>>>> origin/admin_part1
       <div className="absolute top-4 right-4 group">
-        <Link
-          to="/admin/login"
-          className="flex items-center justify-center w-10 h-10 bg-white hover:bg-[#0c3966] text-gray-500 hover:text-white rounded-xl border border-gray-100 shadow-sm transition-all duration-300"
-        >
+        <Link to="/admin/login" className="flex items-center justify-center w-10 h-10 bg-white hover:bg-[#0c3966] text-gray-500 hover:text-white rounded-xl border border-gray-100 shadow-sm transition-all duration-300">
           <ShieldCheck className="w-5 h-5" />
         </Link>
-<<<<<<< HEAD
-=======
-        {/* Tooltip Informasi saat disentuh (Hover) */}
->>>>>>> origin/admin_part1
-        <span className="absolute right-0 top-12 scale-0 transition-all rounded bg-slate-800 p-2 text-center text-[10px] font-semibold text-white group-hover:scale-100 whitespace-nowrap shadow-md pointer-events-none origin-top-right">
-          Portal Admin / Petugas
-        </span>
       </div>
 
-<<<<<<< HEAD
-      {/* Logo */}
-=======
-      {/* ================= LOGO & HEADER APLIKASI ================= */}
->>>>>>> origin/admin_part1
       <div className="flex flex-col items-center mb-6 text-center">
         <div className="w-12 h-12 bg-[#0c3966] rounded-xl flex items-center justify-center shadow-md mb-2">
           <BookOpen className="w-6 h-6 text-white" />
@@ -94,18 +62,9 @@ export default function Login() {
         <p className="text-xs text-gray-500 font-medium mt-0.5">Sistem Perpustakaan Digital</p>
       </div>
 
-<<<<<<< HEAD
-      {/* Form Login */}
       <div className="w-full max-w-[420px] bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8">
         <h2 className="text-lg font-bold text-gray-800 mb-6 text-left">Masuk ke Litera</h2>
 
-=======
-      {/* ================= KARTU FORM LOGIN ================= */}
-      <div className="w-full max-w-[420px] bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8">
-        <h2 className="text-lg font-bold text-gray-800 mb-6 text-left">Masuk ke Litera</h2>
-
-        {/* Notifikasi Error jika validasi/API gagal */}
->>>>>>> origin/admin_part1
         {error && (
           <div className="mb-4 p-3 text-xs font-medium text-red-600 bg-red-50 border border-red-100 rounded-lg">
             {error}
@@ -113,11 +72,6 @@ export default function Login() {
         )}
 
         <form onSubmit={handleLogin} className="space-y-4">
-          
-<<<<<<< HEAD
-=======
-          {/* Input NISN */}
->>>>>>> origin/admin_part1
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-gray-700 block">NISN</label>
             <div className="relative">
@@ -128,28 +82,17 @@ export default function Login() {
                 type="text"
                 maxLength={10}
                 value={nisn}
-<<<<<<< HEAD
                 onChange={(e) => setNisn(e.target.value.replace(/\D/g, ''))}
-=======
-                onChange={(e) => setNisn(e.target.value.replace(/\D/g, ''))} // Hanya menerima angka
->>>>>>> origin/admin_part1
                 placeholder="Masukkan 10 digit NISN"
-                className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-400 placeholder:text-xs"
+                className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966]"
                 required
               />
             </div>
           </div>
 
-<<<<<<< HEAD
-=======
-          {/* Input Password */}
->>>>>>> origin/admin_part1
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
               <label className="text-xs font-bold text-gray-700 block">Password</label>
-              <Link to="/forgot-password" className="text-xs font-semibold text-[#0c3966] hover:underline">
-                Lupa password?
-              </Link>
             </div>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
@@ -160,51 +103,36 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full text-sm pl-10 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-300"
+                className="w-full text-sm pl-10 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966]"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-<<<<<<< HEAD
-=======
-          {/* Tombol Masuk */}
->>>>>>> origin/admin_part1
           <button
             type="submit"
-            disabled={isLoading}
-            className="w-full bg-[#0c3966] hover:bg-[#092a4d] text-white font-semibold text-sm py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm disabled:opacity-75 disabled:cursor-not-allowed mt-2"
+            disabled={isLoading || authLoading}
+            className="w-full bg-[#0c3966] hover:bg-[#092a4d] text-white font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 disabled:opacity-75"
           >
-            {isLoading ? (
-              <span>Memproses...</span>
-            ) : (
-              <>
-                <span>Masuk</span>
-                <LogIn className="w-4 h-4 transform translate-y-[0.5px]" />
-              </>
-            )}
+            {isLoading ? 'Memproses...' : 'Masuk'}
+            <LogIn className="w-4 h-4" />
           </button>
         </form>
 
-<<<<<<< HEAD
-=======
-        {/* Footer Link Registrasi */}
->>>>>>> origin/admin_part1
         <div className="mt-8 text-center text-xs font-medium text-gray-500">
-          Belum terdaftar?{' '}
+          Belum punya akun?{' '}
           <Link to="/register" className="text-[#0c3966] font-bold hover:underline">
-            Registrasi di sini
+            Daftar di sini
           </Link>
         </div>
       </div>
-
     </div>
   );
 }

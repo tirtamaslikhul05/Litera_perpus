@@ -1,69 +1,67 @@
-import React, { useState } from 'react';
-import AdminService from '../../core/services/AdminService';
+// src/views/Admin/AddStudentModal.jsx
+import React, { useState } from "react";
+import AdminService from "../../services/AdminService";
 
 export default function AddStudentModal({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
-    namaLengkap: '',
-    nisn: '',
-    email: '',
-    password: ''
+    name: "",
+    nisn: "",
+    kelas: "",
+    jurusan: "",
   });
 
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   if (!isOpen) return null;
 
+  const updateField = (field) => (e) => {
+    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
-    // Validasi sederhana
     if (formData.nisn.length !== 10) {
-      setError('NISN harus tepat 10 digit angka.');
-      return;
-    }
-    if (formData.password.length < 6) {
-      setError('Kata sandi minimal 6 karakter.');
+      setError("NISN harus tepat 10 digit angka.");
       return;
     }
 
     try {
       setSubmitting(true);
 
-      await AdminService.addStudent(formData);
+      await AdminService.createStudent({
+        name: formData.name,
+        nisn: formData.nisn,
+        kelas: formData.kelas,
+        jurusan: formData.jurusan,
+      });
 
-      alert('✅ Akun siswa berhasil didaftarkan!');
-      
+      alert("✅ Siswa berhasil didaftarkan!");
+
       // Reset form
-      setFormData({ namaLengkap: '', nisn: '', email: '', password: '' });
-      
-      onSuccess?.(); // Refresh tabel di parent
+      setFormData({ name: "", nisn: "", kelas: "", jurusan: "" });
+
+      onSuccess?.();
       onClose();
     } catch (err) {
-      setError(err.message || err.response?.data?.message || 'Gagal menambahkan siswa baru.');
+      setError(err.message || "Gagal menambahkan siswa.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const updateField = (field) => (e) => {
-    setFormData(prev => ({ ...prev, [field]: e.target.value }));
-  };
-
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 font-sans">
+    <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl border border-slate-100 shadow-xl w-full max-w-md p-6 space-y-5 text-slate-800">
-        
-        {/* Header */}
-        <div className="flex justify-between items-center border-b border-slate-100 pb-4">
-          <div>
-            <h3 className="text-lg font-bold text-slate-900">Tambah Akun Siswa Baru</h3>
-            <p className="text-xs text-slate-500">Isi data siswa sesuai dokumen resmi</p>
-          </div>
-          <button 
-            onClick={onClose} 
-            className="text-slate-400 hover:text-slate-600 text-2xl leading-none bg-transparent border-none cursor-pointer"
+        <div className="flex justify-between items-center pb-4 border-b">
+          <h3 className="text-lg font-bold text-slate-900">
+            Tambah Siswa Baru
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 text-2xl leading-none"
           >
             ✕
           </button>
@@ -76,77 +74,88 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess }) {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-600">Nama Lengkap</label>
-            <input 
+            <label className="text-xs font-semibold text-slate-600">
+              Nama Lengkap
+            </label>
+            <input
               type="text"
               required
+              value={formData.name}
+              onChange={updateField("name")}
               placeholder="Nama lengkap siswa"
-              value={formData.namaLengkap}
-              onChange={updateField('namaLengkap')}
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#0c3966]"
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#0c3966]"
               disabled={submitting}
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-600">NISN (10 Digit)</label>
-            <input 
+            <label className="text-xs font-semibold text-slate-600">
+              NISN (10 Digit)
+            </label>
+            <input
               type="text"
               required
               maxLength={10}
-              placeholder="0041234567"
               value={formData.nisn}
-              onChange={(e) => setFormData(prev => ({ ...prev, nisn: e.target.value.replace(/\D/g, '') }))}
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm font-mono focus:outline-none focus:border-[#0c3966]"
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  nisn: e.target.value.replace(/\D/g, ""),
+                }))
+              }
+              placeholder="0081234567"
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm font-mono focus:outline-none focus:border-[#0c3966]"
               disabled={submitting}
             />
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-600">Email Aktif</label>
-            <input 
-              type="email"
-              required
-              placeholder="siswa@litera.sch.id"
-              value={formData.email}
-              onChange={updateField('email')}
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#0c3966]"
-              disabled={submitting}
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-600">
+                Kelas
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.kelas}
+                onChange={updateField("kelas")}
+                placeholder="XII IPA 1"
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#0c3966]"
+                disabled={submitting}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-600">
+                Jurusan
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.jurusan}
+                onChange={updateField("jurusan")}
+                placeholder="IPA / IPS"
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#0c3966]"
+                disabled={submitting}
+              />
+            </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-600">Kata Sandi Awal</label>
-            <input 
-              type="password"
-              required
-              placeholder="Minimal 6 karakter"
-              value={formData.password}
-              onChange={updateField('password')}
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#0c3966]"
-              disabled={submitting}
-            />
-            <p className="text-[10px] text-slate-400">Siswa akan diminta mengganti password saat login pertama.</p>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-3 pt-4 border-t border-slate-100">
-            <button 
-              type="button" 
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
               onClick={onClose}
               disabled={submitting}
-              className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition disabled:opacity-50"
+              className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-bold transition"
             >
               Batal
             </button>
-            <button 
+            <button
               type="submit"
               disabled={submitting}
-              className="flex-1 py-2.5 bg-[#0c3966] hover:bg-[#092a4d] text-white rounded-xl text-sm font-bold transition disabled:opacity-50"
+              className="flex-1 py-3 bg-[#0c3966] hover:bg-[#092a4d] text-white rounded-xl text-sm font-bold transition disabled:opacity-60"
             >
-              {submitting ? 'Menyimpan...' : 'Simpan Siswa'}
+              {submitting ? "Menyimpan..." : "Tambahkan Siswa"}
             </button>
           </div>
         </form>

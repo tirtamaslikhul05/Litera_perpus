@@ -1,67 +1,75 @@
+// src/views/Auth/Register.jsx
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { BookOpen, User, IdCard, Mail, Lock, RefreshCw, ArrowRight } from 'lucide-react';
-import AuthService from '../../core/services/AuthService';
+import AuthService from '../../services/AuthService';
 
 export default function Register() {
   const navigate = useNavigate();
   
-<<<<<<< HEAD
-=======
-  // State form manajemen data input
->>>>>>> origin/admin_part1
-  const [name, setName] = useState('');
-  const [nisn, setNisn] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    nisn: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
-<<<<<<< HEAD
-=======
-    // Validasi panjang digit NISN
->>>>>>> origin/admin_part1
-    if (nisn.length !== 10) {
-      setError('NISN harus tepat berupa 10 digit angka!');
+    // Validasi
+    if (formData.nisn.length !== 10) {
+      setError('NISN harus tepat 10 digit angka!');
       return;
     }
 
-<<<<<<< HEAD
-=======
-    // Validasi kecocokan kata sandi
->>>>>>> origin/admin_part1
-    if (password !== confirmPassword) {
-      setError('Konfirmasi kata sandi tidak cocok.');
+    if (formData.password !== formData.confirmPassword) {
+      setError('Konfirmasi kata sandi tidak cocok!');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password minimal 6 karakter!');
       return;
     }
 
     try {
       setIsLoading(true);
-<<<<<<< HEAD
+
+      // Data yang dikirim sesuai dokumentasi backend
+      const registerData = {
+        school_name: "SMA Nusantara", // bisa diubah nanti
+        admin_name: formData.name,   // untuk register awal
+        email: formData.email,
+        password: formData.password
+      };
+
+      await AuthService.registerSchool(registerData);
       
-      // Panggil AuthService full API (tanpa fake)
-      await AuthService.register(name, nisn, password);
+      setSuccess('Registrasi berhasil! Silakan login dengan akun Anda.');
       
-      setSuccess('Registrasi berhasil! Mengalihkan ke halaman login...');
-      
-=======
-      await AuthService.register(name, nisn, password, email);
-      
-      setSuccess('Registrasi berhasil! Mengalihkan ke halaman login...');
->>>>>>> origin/admin_part1
+      // Redirect ke login setelah 2 detik
       setTimeout(() => {
         navigate('/login');
       }, 2000);
+
     } catch (err) {
-      setError(err.message || 'Gagal melakukan registrasi akun baru.');
+      setError(err.message || 'Gagal melakukan registrasi. Silakan coba lagi.');
     } finally {
       setIsLoading(false);
     }
@@ -71,17 +79,11 @@ export default function Register() {
     <div 
       className="min-h-screen w-full flex flex-col items-center justify-center bg-[#f4f7fa] px-4 font-sans text-[#1e293b] relative overflow-y-auto py-12"
       style={{
-        backgroundImage: `linear-gradient(rgba(244, 247, 250, 0.85), rgba(244, 247, 250, 0.85)), url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1000')`,
+        backgroundImage: `linear-gradient(rgba(244, 247, 250, 0.92), rgba(244, 247, 250, 0.92)), url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1000')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center'
       }}
     >
-      
-<<<<<<< HEAD
-      {/* Logo Header */}
-=======
-      {/* ================= LOGO & HEADER APLIKASI ================= */}
->>>>>>> origin/admin_part1
       <div className="flex flex-col items-center mb-6 text-center z-10">
         <div className="w-12 h-12 bg-[#0c3966] rounded-xl flex items-center justify-center shadow-md mb-2">
           <BookOpen className="w-6 h-6 text-white" />
@@ -90,21 +92,12 @@ export default function Register() {
         <p className="text-xs text-gray-500 font-medium mt-0.5">Sistem Perpustakaan Digital</p>
       </div>
 
-<<<<<<< HEAD
-      {/* Form Register */}
-=======
-      {/* ================= KARTU FORM REGISTRASI ================= */}
->>>>>>> origin/admin_part1
       <div className="w-full max-w-[460px] bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] p-8 z-10">
         <h2 className="text-lg font-bold text-gray-800 text-left">Registrasi Akun Baru</h2>
         <p className="text-xs text-gray-500 font-medium mt-1 mb-6 leading-relaxed">
-          Lengkapi data diri Anda untuk mengakses ribuan koleksi literasi.
+          Daftarkan sekolah dan akun admin pertama Anda.
         </p>
 
-<<<<<<< HEAD
-=======
-        {/* Notifikasi Status Sesi */}
->>>>>>> origin/admin_part1
         {error && (
           <div className="mb-4 p-3 text-xs font-medium text-red-600 bg-red-50 border border-red-100 rounded-lg">
             {error}
@@ -117,11 +110,6 @@ export default function Register() {
         )}
 
         <form onSubmit={handleRegister} className="space-y-4">
-          
-<<<<<<< HEAD
-=======
-          {/* Input Nama Lengkap */}
->>>>>>> origin/admin_part1
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-gray-700 block">Nama Lengkap</label>
             <div className="relative">
@@ -130,19 +118,16 @@ export default function Register() {
               </span>
               <input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
                 placeholder="Contoh: Ahmad Fauzan"
-                className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-400 placeholder:text-xs"
+                className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966]"
                 required
               />
             </div>
           </div>
 
-<<<<<<< HEAD
-=======
-          {/* Input NISN */}
->>>>>>> origin/admin_part1
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-gray-700 block">NISN (10 Digit)</label>
             <div className="relative">
@@ -151,107 +136,83 @@ export default function Register() {
               </span>
               <input
                 type="text"
+                name="nisn"
                 maxLength={10}
-                value={nisn}
-                onChange={(e) => setNisn(e.target.value.replace(/\D/g, ''))}
+                value={formData.nisn}
+                onChange={handleChange}
                 placeholder="Masukkan 10 digit NISN"
-                className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-400 placeholder:text-xs"
+                className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966]"
                 required
               />
             </div>
           </div>
 
-<<<<<<< HEAD
-=======
-          {/* Input Alamat Email */}
->>>>>>> origin/admin_part1
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-700 block">Alamat Email</label>
+            <label className="text-xs font-bold text-gray-700 block">Email</label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
                 <Mail className="w-4 h-4" />
               </span>
               <input
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 placeholder="nama@sekolah.sch.id"
-                className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-400 placeholder:text-xs"
+                className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966]"
                 required
               />
             </div>
           </div>
 
-<<<<<<< HEAD
           <div className="grid grid-cols-2 gap-4">
-=======
-          {/* Baris Sandi & Konfirmasi */}
-          <div className="grid grid-cols-2 gap-4">
-            {/* Input Kata Sandi */}
->>>>>>> origin/admin_part1
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-700 block">Kata Sandi</label>
+              <label className="text-xs font-bold text-gray-700 block">Password</label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
                   <Lock className="w-4 h-4" />
                 </span>
                 <input
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-300"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Minimal 6 karakter"
+                  className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966]"
                   required
                 />
               </div>
             </div>
 
-<<<<<<< HEAD
-=======
-            {/* Input Konfirmasi */}
->>>>>>> origin/admin_part1
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-700 block">Konfirmasi</label>
+              <label className="text-xs font-bold text-gray-700 block">Konfirmasi Password</label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
                   <RefreshCw className="w-4 h-4" />
                 </span>
                 <input
                   type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966] focus:ring-1 focus:ring-[#0c3966] transition-all placeholder:text-gray-300"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Ulangi password"
+                  className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966]"
                   required
                 />
               </div>
             </div>
           </div>
 
-<<<<<<< HEAD
-=======
-          {/* Tombol Akses Pendaftaran */}
->>>>>>> origin/admin_part1
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-[#0c3966] hover:bg-[#092a4d] text-white font-semibold text-sm py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm disabled:opacity-75 disabled:cursor-not-allowed mt-2"
+            className="w-full bg-[#0c3966] hover:bg-[#092a4d] text-white font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 disabled:opacity-75 mt-4"
           >
-            {isLoading ? (
-              <span>Mendaftarkan...</span>
-            ) : (
-              <>
-                <span>Daftar Sekarang</span>
-                <ArrowRight className="w-4 h-4 transform translate-y-[0.5px]" />
-              </>
-            )}
+            {isLoading ? 'Mendaftarkan...' : 'Daftar Sekarang'}
+            <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-<<<<<<< HEAD
-=======
-        {/* Link Navigasi Kembali ke Login */}
->>>>>>> origin/admin_part1
         <div className="mt-8 text-center text-xs font-medium text-gray-500">
           Sudah punya akun?{' '}
           <Link to="/login" className="text-[#0c3966] font-bold hover:underline">
@@ -259,7 +220,6 @@ export default function Register() {
           </Link>
         </div>
       </div>
-
     </div>
   );
 }
