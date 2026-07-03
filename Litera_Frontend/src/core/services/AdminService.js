@@ -111,9 +111,15 @@ const AdminService = {
   },
 
   // ================= Denda (Fines) =================
+  async getAllFines({ status = "", search = "" }) {
+    const params = {};
+    if (status) params.status = status;
+    if (search) params.search = search;
+    const res = await apiClient.get("/admin/fines", { params });
+    return res.data;
+  },
+
   async payDenda(fineId) {
-    // Backend belum memiliki endpoint untuk membayar denda
-    // Ini akan dipanggil oleh ManageFinnes.jsx
     const res = await apiClient.put(`/admin/fines/${fineId}/pay`);
     return res.data;
   },

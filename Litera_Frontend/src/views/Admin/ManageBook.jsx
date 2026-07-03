@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import AdminService from '../../core/services/AdminService';
 import AuthService from '../../core/services/AuthService';
+import AddBookForm from './AddBookForm';
 
 export default function ManageBooks() {
   const navigate = useNavigate();
@@ -124,11 +125,7 @@ export default function ManageBooks() {
         </div>
 
         {viewMode === "add" ? (
-          <div className="bg-white rounded-2xl p-8 border border-slate-100">
-            <p className="text-center text-slate-400 py-12">
-              Form tambah buku akan dibuat di sini (AddBookForm).
-            </p>
-          </div>
+          <AddBookForm onSaveSuccess={() => { setViewMode("list"); fetchBooks(); }} />
         ) : loading ? (
           <div className="text-center py-20">Memuat daftar buku...</div>
         ) : error ? (

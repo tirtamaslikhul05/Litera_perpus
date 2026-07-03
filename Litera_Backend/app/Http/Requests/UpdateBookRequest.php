@@ -31,6 +31,10 @@ class UpdateBookRequest extends FormRequest
                     return $query->where('school_id', auth()->user()->school_id);
                 }),
             ],
+            'penulis'         => 'sometimes|string|max:255',
+            'penerbit'        => 'sometimes|string|max:255',
+            'kategori'        => 'sometimes|string|max:100',
+            'tahun_terbit'    => 'sometimes|integer|min:1000|max:2099',
             'pdf'             => 'sometimes|boolean',
             'jumlah_buku'     => 'sometimes|required|integer|min:0',
             'jumlah_pinjam'   => 'sometimes|integer|min:0',

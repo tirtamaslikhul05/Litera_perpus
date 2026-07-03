@@ -181,6 +181,46 @@ class AdminLoanController extends Controller
     }
 
     /**
+     * GET /api/admin/fines
+     * Menampilkan daftar denda untuk sekolah yang login.
+     */
+    public function allFines(Request $request)
+    {
+        $query = \App\Models\Fine::with(['loan.book', 'user'])
+                                 ->where('school_id', auth()->user()->school_id);
+
+        // Filter status: ?status=pending / paid
+        if ($request->filled('status')) {
+            $query->where('status_denda', $request->status);
+        }
+
+        // Pencarian: ?search=nama_siswa
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('user', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                })->orWhereHas('loan.book', function ($q) use ($search) {
+                    $q->where('nama_buku', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        $fines = $query->latest()->paginate($request->per_page ?? 20);
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => \App\Http\Resources\FineResource::collection($fines->items()),
+            'meta'   => [
+                'current_page' => $fines->currentPage(),
+                'last_page'    => $fines->lastPage(),
+                'per_page'     => $fines->perPage(),
+                'total'        => $fines->total(),
+            ],
+        ]);
+    }
+
+    /**
      * PUT /api/admin/fines/{fine}/pay
      * Menerima pembayaran denda dari siswa.
      * Mengubah status denda dari 'pending' → 'paid'.

@@ -35,8 +35,22 @@ class FineResource extends JsonResource
             ];
         }
 
+        // Data siswa (user)
+        $studentData = null;
+        if ($this->relationLoaded('user') && $this->user) {
+            $studentData = [
+                'id'      => $this->user->id,
+                'name'    => $this->user->name,
+                'nisn'    => $this->user->nisn,
+                'kelas'   => $this->user->kelas,
+                'jurusan' => $this->user->jurusan,
+                'foto'    => $this->user->foto ? asset('storage/' . $this->user->foto) : null,
+            ];
+        }
+
         return [
             'id'              => $this->id,
+            'student'         => $studentData,
             'loan'            => $loanData,
             'jumlah_denda'     => (float) $this->jumlah_denda,
             'hari_terlambat'   => (int) $this->hari_terlambat,

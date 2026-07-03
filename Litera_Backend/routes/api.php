@@ -67,6 +67,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/loans', [AdminLoanController::class, 'index']);
         Route::put('/loans/{loan}/approve', [AdminLoanController::class, 'approve']);
         Route::put('/loans/{loan}/return', [AdminLoanController::class, 'returnBook']);
+        Route::get('/fines', [AdminLoanController::class, 'allFines']);
         Route::put('/fines/{fine}/pay', [AdminLoanController::class, 'payFine']);
     });
 
