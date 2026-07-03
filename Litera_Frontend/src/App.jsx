@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-import { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './views/Auth/login';
-import Register from './views/Auth/register';
-=======
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
@@ -11,11 +5,11 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import ProtectedRoute from './components/Protection/ProtectedRoute';
 
 // Import Seluruh Halaman Views (Sesuai Struktur Folder Modul)
-import Login from './views/Auth/Login';
-import Register from './views/Auth/Register';
+import Login from './views/Auth/login';
+import Register from './views/Auth/register';
 import Overview from './views/Dashboard/Overview';
 import Search from './views/Catalog/Search';
-import Bookshelf from './views/Catalog/Bookshelf';
+import BookShelf from './views/Catalog/BookShelf';
 import BookDetail from './views/Catalog/BookDetail';
 import BookReader from './views/Catalog/BookReader';
 import FinesStatus from './views/Fines/FineStatus';
@@ -31,8 +25,6 @@ import ManageStudent from './views/Admin/ManageStudent';
 import BookReturns from './views/Admin/BookReturns';
 import ManageFinnes from './views/Admin/ManageFinnes';
 
->>>>>>> 5b4662b762cc0176306312ec90d560589a8450d9
-
 export default function App() {
   return (
     <Router>
@@ -45,134 +37,130 @@ export default function App() {
 
         {/* ================= PROTECTED ROUTES (SISWA) ================= */}
         {/* Beranda Utama Aplikasi */}
-        <Route 
-          path="/dashboard" 
+        <Route
+          path="/dashboard"
           element={
-            <ProtectedRoute allowedRoles={['Siswa']}>
+            <ProtectedRoute allowedRoles={['siswa']}>
               <Overview />
             </ProtectedRoute>
-          } 
+          }
         />
 
         {/* Eksplorasi & Sirkulasi Buku */}
-        <Route 
-          path="/catalog/search" 
+        <Route
+          path="/catalog/search"
           element={
-            <ProtectedRoute allowedRoles={['Siswa']}>
+            <ProtectedRoute allowedRoles={['siswa']}>
               <Search />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/catalog/book/:bookId" 
+        <Route
+          path="/catalog/book/:bookId"
           element={
-            <ProtectedRoute allowedRoles={['Siswa']}>
+            <ProtectedRoute allowedRoles={['siswa']}>
               <BookDetail />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/catalog/reader/:bookId" 
+        <Route
+          path="/catalog/reader/:bookId"
           element={
-            <ProtectedRoute allowedRoles={['Siswa']}>
+            <ProtectedRoute allowedRoles={['siswa']}>
               <BookReader />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/bookshelf" 
+        <Route
+          path="/bookshelf"
           element={
-            <ProtectedRoute allowedRoles={['Siswa']}>
-              <Bookshelf />
+            <ProtectedRoute allowedRoles={['siswa']}>
+              <BookShelf />
             </ProtectedRoute>
-          } 
+          }
         />
 
         {/* Status Administrasi Finansial & Denda */}
-        <Route 
-          path="/fines/fines-status" 
+        <Route
+          path="/fines/fines-status"
           element={
-            <ProtectedRoute allowedRoles={['Siswa']}>
+            <ProtectedRoute allowedRoles={['siswa']}>
               <FinesStatus />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/fines/return-status" 
+        <Route
+          path="/fines/return-status"
           element={
-            <ProtectedRoute allowedRoles={['Siswa']}>
+            <ProtectedRoute allowedRoles={['siswa']}>
               <ReturnStatus />
             </ProtectedRoute>
-          } 
+          }
         />
 
         {/* Manajemen Akun & Kartu Anggota Digital */}
-        <Route 
-          path="/profile" 
+        <Route
+          path="/profile"
           element={
-            <ProtectedRoute allowedRoles={['Siswa']}>
+            <ProtectedRoute allowedRoles={['siswa']}>
               <UserProfile />
             </ProtectedRoute>
-          } 
+          }
         />
 
         {/* ================= PROTECTED ROUTES (ADMIN) ================= */}
-        {/* 1. Modul Kelola & Tambah Siswa */}
-        <Route 
-          path="/admin/students" 
+        <Route
+          path="/admin/students"
           element={
-            <ProtectedRoute allowedRoles={['Admin']}>
+            <ProtectedRoute allowedRoles={['admin']}>
               <ManageStudent />
             </ProtectedRoute>
-          } 
+          }
         />
 
-        <Route 
+        <Route
           path="/admin/dashboard"
           element={
-            <ProtectedRoute allowedRoles={['Admin']}>
+            <ProtectedRoute allowedRoles={['admin']}>
               <DashboardAdmin />
             </ProtectedRoute>
           }
         />
-        {/* 2. Modul Pengelolaan Buku */}
-        <Route 
-          path="/admin/books" 
+        {/* Modul Pengelolaan Buku */}
+        <Route
+          path="/admin/books"
           element={
-            <ProtectedRoute allowedRoles={['Admin']}>
+            <ProtectedRoute allowedRoles={['admin']}>
               <ManageBook />
             </ProtectedRoute>
-          } 
+          }
         />
 
-        {/* 3. Modul Pengembalian Buku & Sistem Denda */}
-        <Route 
-          path="/admin/returns" 
+        {/* Modul Pengembalian Buku & Sistem Denda */}
+        <Route
+          path="/admin/returns"
           element={
-            <ProtectedRoute allowedRoles={['Admin']}>
+            <ProtectedRoute allowedRoles={['admin']}>
               <BookReturns />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/admin/fines" 
+        <Route
+          path="/admin/fines"
           element={
-            <ProtectedRoute allowedRoles={['Admin']}>
+            <ProtectedRoute allowedRoles={['admin']}>
               <ManageFinnes />
             </ProtectedRoute>
-          } 
+          }
         />
 
         {/* ================= FALLBACK REDIRECTS ================= */}
-        {/* Menggunakan fungsi logika penentu peran agar tidak salah lempar halaman */}
         <Route path="/" element={<RedirectBasedOnRole />} />
         <Route path="*" element={<RedirectBasedOnRole />} />
       </Routes>
     </Router>
   );
 }
-<<<<<<< HEAD
-=======
 
 // Fungsi internal penentu arah halaman berdasarkan role token aktif
 function RedirectBasedOnRole() {
@@ -183,8 +171,7 @@ function RedirectBasedOnRole() {
     return <Navigate to="/login" replace />;
   }
 
-  return userRole === 'Admin' 
+  return userRole === 'admin'
     ? <Navigate to="/admin/dashboard" replace />
     : <Navigate to="/dashboard" replace />;
 }
->>>>>>> 5b4662b762cc0176306312ec90d560589a8450d9

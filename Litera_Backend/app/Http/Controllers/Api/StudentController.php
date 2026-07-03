@@ -143,6 +143,36 @@ class StudentController extends Controller
      * DELETE /api/students/{student}
      * Menghapus data siswa.
      */
+    /**
+     * PUT /api/students/{student}/toggle-status
+     * Mengaktifkan/menonaktifkan akun siswa.
+     */
+    public function toggleStatus($id)
+    {
+        $student = User::where('school_id', auth()->user()->school_id)
+                       ->where('role', 'siswa')
+                       ->find($id);
+
+        if (!$student) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Siswa tidak ditemukan.',
+            ], 404);
+        }
+
+        $student->status = $student->status === 'Aktif' ? 'Nonaktif' : 'Aktif';
+        $student->save();
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Status siswa berhasil diperbarui menjadi ' . $student->status . '.',
+            'data'    => new StudentResource($student->fresh()),
+        ]);
+    }
+
+    /**
+     * DELETE /api/students/{student}
+     */
     public function destroy($id)
     {
         $student = User::where('school_id', auth()->user()->school_id)

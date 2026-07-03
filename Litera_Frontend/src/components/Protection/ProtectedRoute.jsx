@@ -26,7 +26,7 @@ export default function ProtectedRoute({ children, allowedRoles }) {
 
         if (allowedRoles && !allowedRoles.includes(role)) {
           // Redirect sesuai role
-          setRedirectPath(role === 'Admin' ? '/admin/dashboard' : '/dashboard');
+          setRedirectPath(role === 'admin' ? '/admin/dashboard' : '/dashboard');
           setIsAuthorized(false);
         } else {
           setIsAuthorized(true);

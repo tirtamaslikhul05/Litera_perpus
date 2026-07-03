@@ -23,6 +23,7 @@ class StudentResource extends JsonResource
             'jurusan'    => $this->jurusan,
             'foto'       => $this->foto ? asset('storage/' . $this->foto) : null,
             'role'       => $this->role,
+            'status'     => $this->status ?? 'Aktif',
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
         ];

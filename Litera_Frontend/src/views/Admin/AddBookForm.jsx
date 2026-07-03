@@ -13,7 +13,7 @@ export default function AddBookForm({ onSaveSuccess }) {
     penerbit: "",
     tahun_terbit: "",
     jumlah_buku: 1,
-    pdf: jenisBuku === "E-Book",
+    pdf: jenisBuku === "E-Book", // boolean flag untuk backend
   });
 
   const [coverFile, setCoverFile] = useState(null);
@@ -41,12 +41,18 @@ export default function AddBookForm({ onSaveSuccess }) {
 
       // Data text
       Object.keys(formData).forEach((key) => {
+        // pdf_file akan dikirim manual, jangan dari formData
+        if (key === 'pdf_file') return;
         data.append(key, formData[key]);
       });
 
+      // Kirim pdf sebagai boolean flag (bukan file)
+      data.set('pdf', jenisBuku === 'E-Book' ? '1' : '0');
+
       // Files
       if (coverFile) data.append("cover", coverFile);
-      if (pdfFile) data.append("pdf", pdfFile);
+      // PDF file disimpan dengan key terpisah (tidak konflik dengan boolean pdf)
+      if (pdfFile) data.append("pdf_file", pdfFile);
 
       await AdminService.createBook(data);
 
@@ -62,6 +68,7 @@ export default function AddBookForm({ onSaveSuccess }) {
         tahun_terbit: "",
         jumlah_buku: 1,
         pdf: jenisBuku === "E-Book",
+        pdf_file: "",
       });
       setCoverFile(null);
       setPdfFile(null);
@@ -95,11 +102,10 @@ export default function AddBookForm({ onSaveSuccess }) {
                 key={type}
                 type="button"
                 onClick={() => setJenisBuku(type)}
-                className={`px-5 py-2 rounded-xl text-sm font-medium border transition ${
-                  jenisBuku === type
+                className={`px-5 py-2 rounded-xl text-sm font-medium border transition ${jenisBuku === type
                     ? "bg-[#0c3966] text-white"
                     : "border-slate-200 hover:bg-slate-50"
-                }`}
+                  }`}
               >
                 {type}
               </button>

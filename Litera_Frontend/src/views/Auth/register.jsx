@@ -6,7 +6,7 @@ import AuthService from '../../core/services/AuthService';
 
 export default function Register() {
   const navigate = useNavigate();
-  
+
   const [formData, setFormData] = useState({
     name: '',
     nisn: '',
@@ -29,17 +29,12 @@ export default function Register() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-<<<<<<< HEAD
-
-    if (nisn.length < 5) {
-=======
     setError('');
     setSuccess('');
 
     // Validasi
     if (formData.nisn.length !== 10) {
       setError('NISN harus tepat 10 digit angka!');
->>>>>>> 5b4662b762cc0176306312ec90d560589a8450d9
       return;
     }
 
@@ -65,9 +60,9 @@ export default function Register() {
       };
 
       await AuthService.registerSchool(registerData);
-      
+
       setSuccess('Registrasi berhasil! Silakan login dengan akun Anda.');
-      
+
       // Redirect ke login setelah 2 detik
       setTimeout(() => {
         navigate('/login');
@@ -81,7 +76,7 @@ export default function Register() {
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen w-full flex flex-col items-center justify-center bg-[#f4f7fa] px-4 font-sans text-[#1e293b] relative overflow-y-auto py-12"
       style={{
         backgroundImage: `linear-gradient(rgba(244, 247, 250, 0.92), rgba(244, 247, 250, 0.92)), url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1000')`,
@@ -115,47 +110,6 @@ export default function Register() {
         )}
 
         <form onSubmit={handleRegister} className="space-y-4">
-<<<<<<< HEAD
-          <div>
-            <label className="block text-xs font-bold text-slate-600 mb-1">Nama Lengkap</label>
-            <input type="text" className="w-full px-4 py-2.5 rounded-xl border text-sm focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Nama lengkap sesuai rapor" value={nama} onChange={(e) => setNama(e.target.value)} required />
-          </div>
-
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <label className="block text-xs font-bold text-slate-600">NISN</label>
-              <span className="text-[10px] font-bold text-slate-400">{nisn.length}/5</span>
-            </div>
-            <input
-              type="text"
-              inputMode="numeric"
-              className="w-full px-4 py-2.5 rounded-xl border text-sm font-mono tracking-widest focus:ring-2 focus:ring-emerald-500 outline-none"
-              placeholder="Masukkan 5 digit NISN"
-              value={nisn}
-              onChange={handleNisnChange} // 🔥
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-600 mb-1">Buat Password</label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"} // 🔥
-                className="w-full pl-4 pr-12 py-2.5 rounded-xl border text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
-                placeholder="Minimal 6 karakter"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-emerald-600 transition text-sm"
-              >
-                {showPassword ? "🙈" : "👁️"}
-              </button>
-=======
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-gray-700 block">Nama Lengkap</label>
             <div className="relative">
@@ -171,7 +125,6 @@ export default function Register() {
                 className="w-full text-sm pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0c3966]"
                 required
               />
->>>>>>> 5b4662b762cc0176306312ec90d560589a8450d9
             </div>
           </div>
 

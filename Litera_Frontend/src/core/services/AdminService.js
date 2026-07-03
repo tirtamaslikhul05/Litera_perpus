@@ -56,8 +56,9 @@ const AdminService = {
   },
 
   async updateBook(id, bookFormData) {
+    // Laravel memerlukan _method=PUT di FormData untuk upload file via multipart
+    bookFormData.append('_method', 'PUT');
     const res = await apiClient.post(`/books/${id}`, bookFormData, {
-      // Laravel sering pakai POST untuk update dengan file
       headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data;
@@ -107,6 +108,21 @@ const AdminService = {
       console.error("Gagal mengambil dashboard stats:", error);
       return {};
     }
+  },
+
+  // ================= Denda (Fines) =================
+  async payDenda(fineId) {
+    // Backend belum memiliki endpoint untuk membayar denda
+    // Ini akan dipanggil oleh ManageFinnes.jsx
+    const res = await apiClient.put(`/admin/fines/${fineId}/pay`);
+    return res.data;
+  },
+
+  // ================= Status Siswa =================
+  async toggleStudentStatus(studentId) {
+    // Backend belum memiliki endpoint toggle status siswa
+    const res = await apiClient.put(`/students/${studentId}/toggle-status`);
+    return res.data;
   },
 };
 

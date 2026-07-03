@@ -60,12 +60,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ==================== MANAJEMEN SISWA (CRUD) ====================
     Route::apiResource('/students', StudentController::class);
+    Route::put('/students/{student}/toggle-status', [StudentController::class, 'toggleStatus']);
 
     // ==================== ADMIN LOAN MANAGEMENT ====================
     Route::prefix('/admin')->group(function () {
         Route::get('/loans', [AdminLoanController::class, 'index']);
         Route::put('/loans/{loan}/approve', [AdminLoanController::class, 'approve']);
         Route::put('/loans/{loan}/return', [AdminLoanController::class, 'returnBook']);
+        Route::put('/fines/{fine}/pay', [AdminLoanController::class, 'payFine']);
     });
 
     // ==================== FITUR-FITUR SISWA ====================

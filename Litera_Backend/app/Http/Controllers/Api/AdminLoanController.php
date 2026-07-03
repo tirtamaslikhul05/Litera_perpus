@@ -179,4 +179,41 @@ class AdminLoanController extends Controller
             'data'    => new LoanResource($loan->fresh()->load(['book', 'user'])),
         ]);
     }
+
+    /**
+     * PUT /api/admin/fines/{fine}/pay
+     * Menerima pembayaran denda dari siswa.
+     * Mengubah status denda dari 'pending' → 'paid'.
+     */
+    public function payFine($id)
+    {
+        $fine = \App\Models\Fine::with('loan.book')
+                               ->where('school_id', auth()->user()->school_id)
+                               ->find($id);
+
+        if (!$fine) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Denda tidak ditemukan.',
+            ], 404);
+        }
+
+        if ($fine->status_denda !== 'pending') {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Denda ini sudah lunas.',
+            ], 422);
+        }
+
+        $fine->update([
+            'status_denda'  => 'paid',
+            'tanggal_lunas' => now()->toDateString(),
+        ]);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Pembayaran denda berhasil dicatat.',
+            'data'    => new \App\Http\Resources\FineResource($fine->fresh()),
+        ]);
+    }
 }
