@@ -161,12 +161,11 @@ class DemoSeeder extends Seeder
         }
 
         // ==================== 5. PEMINJAMAN (LOANS) ====================
-        // Siswa 1: Peminjaman pending (buku Pemrograman Laravel - sudah dikurangi stoknya di store)
-        // Note: stok sudah dikurangi saat student request, jadi kita buat loan + update stok
+        // Siswa 1: Peminjaman pending (buku Sejarah Islam - fisik, butuh persetujuan admin)
+        // Note: pending loan tidak memiliki tanggal_pinjam (hanya diisi saat approve)
         Loan::firstOrCreate(
-            ['school_id' => $school->id, 'user_id' => $siswa1->id, 'book_id' => $books[0]->id, 'status' => 'pending'],
+            ['school_id' => $school->id, 'user_id' => $siswa1->id, 'book_id' => $books[4]->id, 'status' => 'pending'],
             [
-                'tanggal_pinjam'      => now()->subDays(1)->toDateString(),
                 'tanggal_jatuh_tempo' => now()->addDays(13)->toDateString(),
                 'status'              => 'pending',
             ]
@@ -192,9 +191,9 @@ class DemoSeeder extends Seeder
             ]
         );
 
-        // Siswa 1: Peminjaman returned (buku Sejarah Islam) - sudah dikembalikan
+        // Siswa 1: Peminjaman returned (buku Pemrograman Laravel - digital, sudah dibaca)
         Loan::firstOrCreate(
-            ['school_id' => $school->id, 'user_id' => $siswa1->id, 'book_id' => $books[4]->id, 'status' => 'returned'],
+            ['school_id' => $school->id, 'user_id' => $siswa1->id, 'book_id' => $books[0]->id, 'status' => 'returned'],
             [
                 'tanggal_pinjam'      => now()->subDays(20)->toDateString(),
                 'tanggal_jatuh_tempo' => now()->subDays(6)->toDateString(),
@@ -250,10 +249,10 @@ class DemoSeeder extends Seeder
         }
         $this->command->info('');
         $this->command->info('--- Data Peminjaman (5 loans) ---');
-        $this->command->info('  1. Pending   : ' . $siswa1->name . ' meminjam "Pemrograman Laravel 10"');
+        $this->command->info('  1. Pending   : ' . $siswa1->name . ' meminjam "Sejarah Peradaban Islam"');
         $this->command->info('  2. Approved  : ' . $siswa1->name . ' meminjam "Dasar-Dasar Algoritma"');
         $this->command->info('  3. Approved  : ' . $siswa2->name . ' meminjam "Matematika Wajib"');
-        $this->command->info('  4. Returned  : ' . $siswa1->name . ' sudah mengembalikan "Sejarah Peradaban Islam"');
+        $this->command->info('  4. Returned  : ' . $siswa1->name . ' sudah mengembalikan "Pemrograman Laravel 10"');
         $this->command->info('  5. Returned  : ' . $siswa2->name . ' terlambat mengembalikan "Fisika untuk SMA" (5 hari)');
         $this->command->info('');
         $this->command->info('--- Data Denda ---');

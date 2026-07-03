@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\StudentBookController;
 use App\Http\Controllers\Api\StudentLoanController;
 use App\Http\Controllers\Api\StudentFineController;
 use App\Http\Controllers\Api\StudentProfileController;
+use App\Http\Controllers\Api\StudentWishlistController;
 
 /*
 |--------------------------------------------------------------------------
@@ -87,5 +88,10 @@ Route::middleware('auth:sanctum')->group(function () {
         // 👤 Profil Siswa (MD-8)
         Route::get('/profile', [StudentProfileController::class, 'show']);
         Route::put('/profile', [StudentProfileController::class, 'update']);
+
+        // ⭐ Wishlist Buku (MD-9)
+        Route::get('/wishlists', [StudentWishlistController::class, 'index']);
+        Route::post('/wishlists', [StudentWishlistController::class, 'store']);
+        Route::delete('/wishlists/{id}', [StudentWishlistController::class, 'destroy']);
     });
 });

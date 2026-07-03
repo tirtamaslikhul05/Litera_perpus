@@ -14,21 +14,30 @@ class FineResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
-            'id'              => $this->id,
-            'loan' => [
+        $loanData = null;
+        if ($this->relationLoaded('loan') && $this->loan) {
+            $bookData = null;
+            if ($this->loan->relationLoaded('book') && $this->loan->book) {
+                $bookData = [
+                    'id'        => $this->loan->book->id,
+                    'nama_buku' => $this->loan->book->nama_buku,
+                    'isbn'      => $this->loan->book->isbn,
+                    'cover'     => $this->loan->book->cover ? asset('storage/' . $this->loan->book->cover) : null,
+                ];
+            }
+            $loanData = [
                 'id'                => $this->loan->id,
                 'tanggal_pinjam'    => $this->loan->tanggal_pinjam?->format('Y-m-d'),
                 'tanggal_jatuh_tempo' => $this->loan->tanggal_jatuh_tempo?->format('Y-m-d'),
                 'tanggal_kembali'   => $this->loan->tanggal_kembali?->format('Y-m-d'),
                 'status'            => $this->loan->status,
-                'book' => [
-                    'id'        => $this->loan->book->id,
-                    'nama_buku' => $this->loan->book->nama_buku,
-                    'isbn'      => $this->loan->book->isbn,
-                    'cover'     => $this->loan->book->cover ? asset('storage/' . $this->loan->book->cover) : null,
-                ],
-            ],
+                'book'              => $bookData,
+            ];
+        }
+
+        return [
+            'id'              => $this->id,
+            'loan'            => $loanData,
             'jumlah_denda'     => (float) $this->jumlah_denda,
             'hari_terlambat'   => (int) $this->hari_terlambat,
             'status_denda'     => $this->status_denda,

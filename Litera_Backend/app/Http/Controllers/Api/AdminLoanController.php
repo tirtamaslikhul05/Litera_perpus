@@ -84,14 +84,17 @@ class AdminLoanController extends Controller
             ], 422);
         }
 
+        // Pastikan stok tersedia sebelum diproses
+        if ($loan->book->jumlah_tersedia <= 0) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Stok buku tidak tersedia.',
+            ], 422);
+        }
+
         // Gunakan DB transaction agar konsisten
         DB::transaction(function () use ($loan) {
             $book = $loan->book;
-
-            // Pastikan stok tersedia
-            if ($book->jumlah_tersedia <= 0) {
-                throw new \Exception('Stok buku tidak tersedia.');
-            }
 
             // Update stok buku
             $book->decrement('jumlah_tersedia');
@@ -146,9 +149,28 @@ class AdminLoanController extends Controller
 
             // Update status peminjaman
             $loan->update([
-                'status'         => 'returned',
+                'status'          => 'returned',
                 'tanggal_kembali' => now()->toDateString(),
             ]);
+
+            // Hitung denda jika terlambat
+            $jatuhTempo = \Carbon\Carbon::parse($loan->tanggal_jatuh_tempo);
+            $hariIni = now();
+            $hariTerlambat = $jatuhTempo->diffInDays($hariIni, false); // false = negative if not overdue
+
+            if ($hariTerlambat > 0) {
+                $dendaPerHari = 1000; // Rp 1.000 per hari
+                $jumlahDenda = $hariTerlambat * $dendaPerHari;
+
+                $loan->user->fines()->create([
+                    'school_id'        => $loan->school_id,
+                    'loan_id'          => $loan->id,
+                    'jumlah_denda'     => $jumlahDenda,
+                    'hari_terlambat'   => $hariTerlambat,
+                    'status_denda'     => 'pending',
+                    'tanggal_dikenakan'=> now()->toDateString(),
+                ]);
+            }
         });
 
         return response()->json([

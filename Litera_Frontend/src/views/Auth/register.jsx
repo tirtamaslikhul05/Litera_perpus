@@ -19,7 +19,7 @@ export default function Register() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    
+
     if (nisn.length < 5) {
       return;
     }
@@ -41,35 +41,35 @@ export default function Register() {
             <label className="block text-xs font-bold text-slate-600 mb-1">Nama Lengkap</label>
             <input type="text" className="w-full px-4 py-2.5 rounded-xl border text-sm focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Nama lengkap sesuai rapor" value={nama} onChange={(e) => setNama(e.target.value)} required />
           </div>
-          
+
           <div>
             <div className="flex justify-between items-center mb-1">
               <label className="block text-xs font-bold text-slate-600">NISN</label>
               <span className="text-[10px] font-bold text-slate-400">{nisn.length}/5</span>
             </div>
-            <input 
-              type="text" 
+            <input
+              type="text"
               inputMode="numeric"
-              className="w-full px-4 py-2.5 rounded-xl border text-sm font-mono tracking-widest focus:ring-2 focus:ring-emerald-500 outline-none" 
-              placeholder="Masukkan 5 digit NISN" 
-              value={nisn} 
+              className="w-full px-4 py-2.5 rounded-xl border text-sm font-mono tracking-widest focus:ring-2 focus:ring-emerald-500 outline-none"
+              placeholder="Masukkan 5 digit NISN"
+              value={nisn}
               onChange={handleNisnChange} // 🔥
-              required 
+              required
             />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1">Buat Password</label>
             <div className="relative">
-              <input 
+              <input
                 type={showPassword ? "text" : "password"} // 🔥
-                className="w-full pl-4 pr-12 py-2.5 rounded-xl border text-sm focus:ring-2 focus:ring-emerald-500 outline-none" 
-                placeholder="Minimal 6 karakter" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                required 
+                className="w-full pl-4 pr-12 py-2.5 rounded-xl border text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+                placeholder="Minimal 6 karakter"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
-              <button 
+              <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-emerald-600 transition text-sm"

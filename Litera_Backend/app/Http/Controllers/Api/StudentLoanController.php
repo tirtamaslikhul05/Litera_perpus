@@ -66,14 +66,6 @@ class StudentLoanController extends Controller
             ], 404);
         }
 
-        // Cek apakah stok tersedia
-        if ($book->jumlah_tersedia <= 0) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Maaf, stok buku ini sedang habis.',
-            ], 422);
-        }
-
         // Cek apakah siswa sudah punya peminjaman pending/approved untuk buku yang sama
         $existingLoan = Loan::where('school_id', $user->school_id)
                             ->where('user_id', $user->id)
@@ -89,18 +81,44 @@ class StudentLoanController extends Controller
         }
 
         // Buat peminjaman baru - stok akan dikurangi saat admin menyetujui
-        $loan = Loan::create([
+        $loanData = [
             'school_id'          => $user->school_id,
             'book_id'            => $book->id,
             'user_id'            => $user->id,
-            'tanggal_pinjam'     => now()->toDateString(),
             'tanggal_jatuh_tempo'=> now()->addDays(14)->toDateString(),
             'status'             => 'pending',
-        ]);
+        ];
+
+        // Cek stok tersedia (untuk SEMUA jenis buku, baik fisik maupun digital)
+        if ($book->jumlah_tersedia <= 0) {
+            $tipeBuku = $book->pdf ? 'digital' : 'fisik';
+            return response()->json([
+                'status'  => 'error',
+                'message' => "Maaf, stok buku {$tipeBuku} ini sedang habis.",
+            ], 422);
+        }
+
+        // Untuk buku digital (PDF), auto-approve langsung tanpa menunggu admin
+        if ($book->pdf) {
+            $loanData['status'] = 'approved';
+            $loanData['tanggal_pinjam'] = now()->toDateString();
+        }
+
+        $loan = Loan::create($loanData);
+
+        // Jika buku digital, kurangi stok langsung
+        if ($book->pdf) {
+            $book->decrement('jumlah_tersedia');
+            $book->increment('jumlah_pinjam');
+        }
+
+        $message = $book->pdf
+            ? 'Buku digital berhasil diakses. Selamat membaca!'
+            : 'Peminjaman berhasil diajukan. Menunggu persetujuan admin.';
 
         return response()->json([
             'status'  => 'success',
-            'message' => 'Peminjaman berhasil diajukan. Menunggu persetujuan admin.',
+            'message' => $message,
             'data'    => new LoanResource($loan->load(['book', 'user'])),
         ], 201);
     }

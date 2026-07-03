@@ -84,13 +84,13 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name'      => 'required|string|max:255',
             'nisn'      => 'required|string|unique:users,nisn',
-            'school_id' => 'required|integer|exists:schools,id',
             'kelas'     => 'sometimes|required|string|max:50',
             'jurusan'   => 'sometimes|required|string|max:100',
         ]);
 
+        // Gunakan school_id dari admin yang login (keamanan)
         $user = User::create([
-            'school_id' => $request->school_id,
+            'school_id' => auth()->user()->school_id,
             'name'      => $request->name,
             'nisn'      => $request->nisn,
             'kelas'     => $request->kelas,

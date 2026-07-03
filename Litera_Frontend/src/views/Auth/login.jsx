@@ -18,7 +18,7 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    
+
     if (nisn.length < 5) {
       return;
     }
@@ -28,7 +28,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-4">
-      
+
       <div className="bg-white/95 backdrop-blur-sm p-6 sm:p-10 rounded-3xl shadow-2xl w-full max-w-md border border-white/20">
         <div className="text-center mb-8">
           <span className="text-4xl">📚</span>
@@ -42,29 +42,29 @@ export default function Login() {
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">NISN Siswa</label>
               <span className="text-[10px] font-semibold text-slate-400">{nisn.length}/5 Digit</span>
             </div>
-            <input 
-              type="text" 
+            <input
+              type="text"
               inputMode="numeric"
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition tracking-widest font-mono" 
-              placeholder="12345" 
-              value={nisn} 
-              onChange={handleNisnChange} 
-              required 
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition tracking-widest font-mono"
+              placeholder="12345"
+              value={nisn}
+              onChange={handleNisnChange}
+              required
             />
           </div>
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Password</label>
             <div className="relative">
-              <input 
-                type={showPassword ? "text" : "password"} 
-                className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition" 
-                placeholder="••••••••" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                required 
+              <input
+                type={showPassword ? "text" : "password"}
+                className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
-              <button 
+              <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-0 pr-4 flex items-center text-sm leading-5 text-slate-500 hover:text-indigo-600 transition"

@@ -1,0 +1,450 @@
+[1mdiff --git a/Litera_Backend/app/Http/Controllers/Api/AdminLoanController.php b/Litera_Backend/app/Http/Controllers/Api/AdminLoanController.php[m
+[1mindex 6bffe20..75a3912 100644[m
+[1m--- a/Litera_Backend/app/Http/Controllers/Api/AdminLoanController.php[m
+[1m+++ b/Litera_Backend/app/Http/Controllers/Api/AdminLoanController.php[m
+[36m@@ -84,15 +84,18 @@[m [mpublic function approve($id)[m
+             ], 422);[m
+         }[m
+ [m
+[32m+[m[32m        // Pastikan stok tersedia sebelum diproses[m
+[32m+[m[32m        if ($loan->book->jumlah_tersedia <= 0) {[m
+[32m+[m[32m            return response()->json([[m
+[32m+[m[32m                'status'  => 'error',[m
+[32m+[m[32m                'message' => 'Stok buku tidak tersedia.',[m
+[32m+[m[32m            ], 422);[m
+[32m+[m[32m        }[m
+[32m+[m
+         // Gunakan DB transaction agar konsisten[m
+         DB::transaction(function () use ($loan) {[m
+             $book = $loan->book;[m
+ [m
+[31m-            // Pastikan stok tersedia[m
+[31m-            if ($book->jumlah_tersedia <= 0) {[m
+[31m-                throw new \Exception('Stok buku tidak tersedia.');[m
+[31m-            }[m
+[31m-[m
+             // Update stok buku[m
+             $book->decrement('jumlah_tersedia');[m
+             $book->increment('jumlah_pinjam');[m
+[36m@@ -146,9 +149,28 @@[m [mpublic function returnBook($id)[m
+ [m
+             // Update status peminjaman[m
+             $loan->update([[m
+[31m-                'status'         => 'returned',[m
+[32m+[m[32m                'status'          => 'returned',[m
+                 'tanggal_kembali' => now()->toDateString(),[m
+             ]);[m
+[32m+[m
+[32m+[m[32m            // Hitung denda jika terlambat[m
+[32m+[m[32m            $jatuhTempo = \Carbon\Carbon::parse($loan->tanggal_jatuh_tempo);[m
+[32m+[m[32m            $hariIni = now();[m
+[32m+[m[32m            $hariTerlambat = $jatuhTempo->diffInDays($hariIni, false); // false = negative if not overdue[m
+[32m+[m
+[32m+[m[32m            if ($hariTerlambat > 0) {[m
+[32m+[m[32m                $dendaPerHari = 1000; // Rp 1.000 per hari[m
+[32m+[m[32m                $jumlahDenda = $hariTerlambat * $dendaPerHari;[m
+[32m+[m
+[32m+[m[32m                $loan->user->fines()->create([[m
+[32m+[m[32m                    'school_id'        => $loan->school_id,[m
+[32m+[m[32m                    'loan_id'          => $loan->id,[m
+[32m+[m[32m                    'jumlah_denda'     => $jumlahDenda,[m
+[32m+[m[32m                    'hari_terlambat'   => $hariTerlambat,[m
+[32m+[m[32m                    'status_denda'     => 'pending',[m
+[32m+[m[32m                    'tanggal_dikenakan'=> now()->toDateString(),[m
+[32m+[m[32m                ]);[m
+[32m+[m[32m            }[m
+         });[m
+ [m
+         return response()->json([[m
+[1mdiff --git a/Litera_Backend/app/Http/Controllers/Api/AuthController.php b/Litera_Backend/app/Http/Controllers/Api/AuthController.php[m
+[1mindex 991b1e4..343427b 100644[m
+[1m--- a/Litera_Backend/app/Http/Controllers/Api/AuthController.php[m
+[1m+++ b/Litera_Backend/app/Http/Controllers/Api/AuthController.php[m
+[36m@@ -84,13 +84,13 @@[m [mpublic function registerStudent(Request $request)[m
+         $validated = $request->validate([[m
+             'name'      => 'required|string|max:255',[m
+             'nisn'      => 'required|string|unique:users,nisn',[m
+[31m-            'school_id' => 'required|integer|exists:schools,id',[m
+             'kelas'     => 'sometimes|required|string|max:50',[m
+             'jurusan'   => 'sometimes|required|string|max:100',[m
+         ]);[m
+ [m
+[32m+[m[32m        // Gunakan school_id dari admin yang login (keamanan)[m
+         $user = User::create([[m
+[31m-            'school_id' => $request->school_id,[m
+[32m+[m[32m            'school_id' => auth()->user()->school_id,[m
+             'name'      => $request->name,[m
+             'nisn'      => $request->nisn,[m
+             'kelas'     => $request->kelas,[m
+[1mdiff --git a/Litera_Backend/app/Http/Controllers/Api/StudentLoanController.php b/Litera_Backend/app/Http/Controllers/Api/StudentLoanController.php[m
+[1mindex e7733ff..374a55d 100644[m
+[1m--- a/Litera_Backend/app/Http/Controllers/Api/StudentLoanController.php[m
+[1m+++ b/Litera_Backend/app/Http/Controllers/Api/StudentLoanController.php[m
+[36m@@ -66,14 +66,6 @@[m [mpublic function store(Request $request)[m
+             ], 404);[m
+         }[m
+ [m
+[31m-        // Cek apakah stok tersedia[m
+[31m-        if ($book->jumlah_tersedia <= 0) {[m
+[31m-            return response()->json([[m
+[31m-                'status'  => 'error',[m
+[31m-                'message' => 'Maaf, stok buku ini sedang habis.',[m
+[31m-            ], 422);[m
+[31m-        }[m
+[31m-[m
+         // Cek apakah siswa sudah punya peminjaman pending/approved untuk buku yang sama[m
+         $existingLoan = Loan::where('school_id', $user->school_id)[m
+                             ->where('user_id', $user->id)[m
+[36m@@ -89,18 +81,44 @@[m [mpublic function store(Request $request)[m
+         }[m
+ [m
+         // Buat peminjaman baru - stok akan dikurangi saat admin menyetujui[m
+[31m-        $loan = Loan::create([[m
+[32m+[m[32m        $loanData = [[m
+             'school_id'          => $user->school_id,[m
+             'book_id'            => $book->id,[m
+             'user_id'            => $user->id,[m
+[31m-            'tanggal_pinjam'     => now()->toDateString(),[m
+             'tanggal_jatuh_tempo'=> now()->addDays(14)->toDateString(),[m
+             'status'             => 'pending',[m
+[31m-        ]);[m
+[32m+[m[32m        ];[m
+[32m+[m
+[32m+[m[32m        // Cek stok tersedia (untuk SEMUA jenis buku, baik fisik maupun digital)[m
+[32m+[m[32m        if ($book->jumlah_tersedia <= 0) {[m
+[32m+[m[32m            $tipeBuku = $book->pdf ? 'digital' : 'fisik';[m
+[32m+[m[32m            return response()->json([[m
+[32m+[m[32m                'status'  => 'error',[m
+[32m+[m[32m                'message' => "Maaf, stok buku {$tipeBuku} ini sedang habis.",[m
+[32m+[m[32m            ], 422);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        // Untuk buku digital (PDF), auto-approve langsung tanpa menunggu admin[m
+[32m+[m[32m        if ($book->pdf) {[m
+[32m+[m[32m            $loanData['status'] = 'approved';[m
+[32m+[m[32m            $loanData['tanggal_pinjam'] = now()->toDateString();[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        $loan = Loan::create($loanData);[m
+[32m+[m
+[32m+[m[32m        // Jika buku digital, kurangi stok langsung[m
+[32m+[m[32m        if ($book->pdf) {[m
+[32m+[m[32m            $book->decrement('jumlah_tersedia');[m
+[32m+[m[32m            $book->increment('jumlah_pinjam');[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        $message = $book->pdf[m
+[32m+[m[32m            ? 'Buku digital berhasil diakses. Selamat membaca!'[m
+[32m+[m[32m            : 'Peminjaman berhasil diajukan. Menunggu persetujuan admin.';[m
+ [m
+         return response()->json([[m
+             'status'  => 'success',[m
+[31m-            'message' => 'Peminjaman berhasil diajukan. Menunggu persetujuan admin.',[m
+[32m+[m[32m            'message' => $message,[m
+             'data'    => new LoanResource($loan->load(['book', 'user'])),[m
+         ], 201);[m
+     }[m
+[1mdiff --git a/Litera_Backend/app/Http/Resources/FineResource.php b/Litera_Backend/app/Http/Resources/FineResource.php[m
+[1mindex bcb8dea..1eab7de 100644[m
+[1m--- a/Litera_Backend/app/Http/Resources/FineResource.php[m
+[1m+++ b/Litera_Backend/app/Http/Resources/FineResource.php[m
+[36m@@ -14,21 +14,30 @@[m [mclass FineResource extends JsonResource[m
+      */[m
+     public function toArray(Request $request): array[m
+     {[m
+[31m-        return [[m
+[31m-            'id'              => $this->id,[m
+[31m-            'loan' => [[m
+[32m+[m[32m        $loanData = null;[m
+[32m+[m[32m        if ($this->relationLoaded('loan') && $this->loan) {[m
+[32m+[m[32m            $bookData = null;[m
+[32m+[m[32m            if ($this->loan->relationLoaded('book') && $this->loan->book) {[m
+[32m+[m[32m                $bookData = [[m
+[32m+[m[32m                    'id'        => $this->loan->book->id,[m
+[32m+[m[32m                    'nama_buku' => $this->loan->book->nama_buku,[m
+[32m+[m[32m                    'isbn'      => $this->loan->book->isbn,[m
+[32m+[m[32m                    'cover'     => $this->loan->book->cover ? asset('storage/' . $this->loan->book->cover) : null,[m
+[32m+[m[32m                ];[m
+[32m+[m[32m            }[m
+[32m+[m[32m            $loanData = [[m
+                 'id'                => $this->loan->id,[m
+                 'tanggal_pinjam'    => $this->loan->tanggal_pinjam?->format('Y-m-d'),[m
+                 'tanggal_jatuh_tempo' => $this->loan->tanggal_jatuh_tempo?->format('Y-m-d'),[m
+                 'tanggal_kembali'   => $this->loan->tanggal_kembali?->format('Y-m-d'),[m
+                 'status'            => $this->loan->status,[m
+[31m-                'book' => [[m
+[31m-                    'id'        => $this->loan->book->id,[m
+[31m-                    'nama_buku' => $this->loan->book->nama_buku,[m
+[31m-                    'isbn'      => $this->loan->book->isbn,[m
+[31m-                    'cover'     => $this->loan->book->cover ? asset('storage/' . $this->loan->book->cover) : null,[m
+[31m-                ],[m
+[31m-            ],[m
+[32m+[m[32m                'book'              => $bookData,[m
+[32m+[m[32m            ];[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        return [[m
+[32m+[m[32m            'id'              => $this->id,[m
+[32m+[m[32m            'loan'            => $loanData,[m
+             'jumlah_denda'     => (float) $this->jumlah_denda,[m
+             'hari_terlambat'   => (int) $this->hari_terlambat,[m
+             'status_denda'     => $this->status_denda,[m
+[1mdiff --git a/Litera_Backend/app/Http/Resources/LoanResource.php b/Litera_Backend/app/Http/Resources/LoanResource.php[m
+[1mindex 2ccf104..45c82bd 100644[m
+[1m--- a/Litera_Backend/app/Http/Resources/LoanResource.php[m
+[1m+++ b/Litera_Backend/app/Http/Resources/LoanResource.php[m
+[36m@@ -16,20 +16,20 @@[m [mpublic function toArray(Request $request): array[m
+     {[m
+         return [[m
+             'id'                => $this->id,[m
+[31m-            'book' => [[m
+[32m+[m[32m            'book' => $this->relationLoaded('book') && $this->book ? [[m
+                 'id'        => $this->book->id,[m
+                 'nama_buku' => $this->book->nama_buku,[m
+                 'isbn'      => $this->book->isbn,[m
+                 'cover'     => $this->book->cover ? asset('storage/' . $this->book->cover) : null,[m
+[31m-            ],[m
+[31m-            'student' => [[m
+[32m+[m[32m            ] : null,[m
+[32m+[m[32m            'student' => $this->relationLoaded('user') && $this->user ? [[m
+                 'id'      => $this->user->id,[m
+                 'name'    => $this->user->name,[m
+                 'nisn'    => $this->user->nisn,[m
+                 'kelas'   => $this->user->kelas,[m
+                 'jurusan' => $this->user->jurusan,[m
+                 'foto'    => $this->user->foto ? asset('storage/' . $this->user->foto) : null,[m
+[31m-            ],[m
+[32m+[m[32m            ] : null,[m
+             'tanggal_pinjam'      => $this->tanggal_pinjam?->format('Y-m-d'),[m
+             'tanggal_jatuh_tempo' => $this->tanggal_jatuh_tempo?->format('Y-m-d'),[m
+             'tanggal_kembali'     => $this->tanggal_kembali?->format('Y-m-d'),[m
+[1mdiff --git a/Litera_Backend/database/seeders/DemoSeeder.php b/Litera_Backend/database/seeders/DemoSeeder.php[m
+[1mindex 201b754..c850083 100644[m
+[1m--- a/Litera_Backend/database/seeders/DemoSeeder.php[m
+[1m+++ b/Litera_Backend/database/seeders/DemoSeeder.php[m
+[36m@@ -161,12 +161,11 @@[m [mpublic function run(): void[m
+         }[m
+ [m
+         // ==================== 5. PEMINJAMAN (LOANS) ====================[m
+[31m-        // Siswa 1: Peminjaman pending (buku Pemrograman Laravel - sudah dikurangi stoknya di store)[m
+[31m-        // Note: stok sudah dikurangi saat student request, jadi kita buat loan + update stok[m
+[32m+[m[32m        // Siswa 1: Peminjaman pending (buku Sejarah Islam - fisik, butuh persetujuan admin)[m
+[32m+[m[32m        // Note: pending loan tidak memiliki tanggal_pinjam (hanya diisi saat approve)[m
+         Loan::firstOrCreate([m
+[31m-            ['school_id' => $school->id, 'user_id' => $siswa1->id, 'book_id' => $books[0]->id, 'status' => 'pending'],[m
+[32m+[m[32m            ['school_id' => $school->id, 'user_id' => $siswa1->id, 'book_id' => $books[4]->id, 'status' => 'pending'],[m
+             [[m
+[31m-                'tanggal_pinjam'      => now()->subDays(1)->toDateString(),[m
+                 'tanggal_jatuh_tempo' => now()->addDays(13)->toDateString(),[m
+                 'status'              => 'pending',[m
+             ][m
+[36m@@ -192,9 +191,9 @@[m [mpublic function run(): void[m
+             ][m
+         );[m
+ [m
+[31m-        // Siswa 1: Peminjaman returned (buku Sejarah Islam) - sudah dikembalikan[m
+[32m+[m[32m        // Siswa 1: Peminjaman returned (buku Pemrograman Laravel - digital, sudah dibaca)[m
+         Loan::firstOrCreate([m
+[31m-            ['school_id' => $school->id, 'user_id' => $siswa1->id, 'book_id' => $books[4]->id, 'status' => 'returned'],[m
+[32m+[m[32m            ['school_id' => $school->id, 'user_id' => $siswa1->id, 'book_id' => $books[0]->id, 'status' => 'returned'],[m
+             [[m
+                 'tanggal_pinjam'      => now()->subDays(20)->toDateString(),[m
+                 'tanggal_jatuh_tempo' => now()->subDays(6)->toDateString(),[m
+[36m@@ -250,10 +249,10 @@[m [mpublic function run(): void[m
+         }[m
+         $this->command->info('');[m
+         $this->command->info('--- Data Peminjaman (5 loans) ---');[m
+[31m-        $this->command->info('  1. Pending   : ' . $siswa1->name . ' meminjam "Pemrograman Laravel 10"');[m
+[32m+[m[32m        $this->command->info('  1. Pending   : ' . $siswa1->name . ' meminjam "Sejarah Peradaban Islam"');[m
+         $this->command->info('  2. Approved  : ' . $siswa1->name . ' meminjam "Dasar-Dasar Algoritma"');[m
+         $this->command->info('  3. Approved  : ' . $siswa2->name . ' meminjam "Matematika Wajib"');[m
+[31m-        $this->command->info('  4. Returned  : ' . $siswa1->name . ' sudah mengembalikan "Sejarah Peradaban Islam"');[m
+[32m+[m[32m        $this->command->info('  4. Returned  : ' . $siswa1->name . ' sudah mengembalikan "Pemrograman Laravel 10"');[m
+         $this->command->info('  5. Returned  : ' . $siswa2->name . ' terlambat mengembalikan "Fisika untuk SMA" (5 hari)');[m
+         $this->command->info('');[m
+         $this->command->info('--- Data Denda ---');[m
+[1mdiff --git a/Litera_Backend/routes/api.php b/Litera_Backend/routes/api.php[m
+[1mindex 344e0d7..a8944c7 100644[m
+[1m--- a/Litera_Backend/routes/api.php[m
+[1m+++ b/Litera_Backend/routes/api.php[m
+[36m@@ -10,6 +10,7 @@[m
+ use App\Http\Controllers\Api\StudentLoanController;[m
+ use App\Http\Controllers\Api\StudentFineController;[m
+ use App\Http\Controllers\Api\StudentProfileController;[m
+[32m+[m[32muse App\Http\Controllers\Api\StudentWishlistController;[m
+ [m
+ /*[m
+ |--------------------------------------------------------------------------[m
+[36m@@ -87,5 +88,10 @@[m
+         // 👤 Profil Siswa (MD-8)[m
+         Route::get('/profile', [StudentProfileController::class, 'show']);[m
+         Route::put('/profile', [StudentProfileController::class, 'update']);[m
+[32m+[m
+[32m+[m[32m        // ⭐ Wishlist Buku (MD-9)[m
+[32m+[m[32m        Route::get('/wishlists', [StudentWishlistController::class, 'index']);[m
+[32m+[m[32m        Route::post('/wishlists', [StudentWishlistController::class, 'store']);[m
+[32m+[m[32m        Route::delete('/wishlists/{id}', [StudentWishlistController::class, 'destroy']);[m
+     });[m
+ });[m
+[1mdiff --git a/Litera_Frontend/src/App.jsx b/Litera_Frontend/src/App.jsx[m
+[1mindex f11bd38..d45cd12 100644[m
+[1m--- a/Litera_Frontend/src/App.jsx[m
+[1m+++ b/Litera_Frontend/src/App.jsx[m
+[36m@@ -1,5 +1,5 @@[m
+ import { useState } from 'react'[m
+[31m-import { BrowserRouter as Router , Routes, Route, Navigate } from 'react-router-dom';[m
+[32m+[m[32mimport { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';[m
+ import Login from './views/Auth/login';[m
+ import Register from './views/Auth/register';[m
+ [m
+[36m@@ -13,4 +13,4 @@[m [mexport default function App() {[m
+       </Routes>[m
+     </Router>[m
+   );[m
+[31m-}[m
+\ No newline at end of file[m
+[32m+[m[32m}[m
+[1mdiff --git a/Litera_Frontend/src/views/Auth/login.jsx b/Litera_Frontend/src/views/Auth/login.jsx[m
+[1mindex a3ec390..95702c8 100644[m
+[1m--- a/Litera_Frontend/src/views/Auth/login.jsx[m
+[1m+++ b/Litera_Frontend/src/views/Auth/login.jsx[m
+[36m@@ -18,7 +18,7 @@[m [mexport default function Login() {[m
+ [m
+   const handleLogin = async (e) => {[m
+     e.preventDefault();[m
+[31m-    [m
+[32m+[m
+     if (nisn.length < 5) {[m
+       return;[m
+     }[m
+[36m@@ -28,7 +28,7 @@[m [mexport default function Login() {[m
+ [m
+   return ([m
+     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-4">[m
+[31m-      [m
+[32m+[m
+       <div className="bg-white/95 backdrop-blur-sm p-6 sm:p-10 rounded-3xl shadow-2xl w-full max-w-md border border-white/20">[m
+         <div className="text-center mb-8">[m
+           <span className="text-4xl">📚</span>[m
+[36m@@ -42,29 +42,29 @@[m [mexport default function Login() {[m
+               <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">NISN Siswa</label>[m
+               <span className="text-[10px] font-semibold text-slate-400">{nisn.length}/5 Digit</span>[m
+             </div>[m
+[31m-            <input [m
+[31m-              type="text" [m
+[32m+[m[32m            <input[m
+[32m+[m[32m              type="text"[m
+               inputMode="numeric"[m
+[31m-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition tracking-widest font-mono" [m
+[31m-              placeholder="12345" [m
+[31m-              value={nisn} [m
+[31m-              onChange={handleNisnChange} [m
+[31m-              required [m
+[32m+[m[32m              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition tracking-widest font-mono"[m
+[32m+[m[32m              placeholder="12345"[m
+[32m+[m[32m              value={nisn}[m
+[32m+[m[32m              onChange={handleNisnChange}[m
+[32m+[m[32m              required[m
+             />[m
+           </div>[m
+ [m
+           <div>[m
+             <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Password</label>[m
+             <div className="relative">[m
+[31m-              <input [m
+[31m-                type={showPassword ? "text" : "password"} [m
+[31m-                className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition" [m
+[31m-                placeholder="••••••••" [m
+[31m-                value={password} [m
+[31m-                onChange={(e) => setPassword(e.target.value)} [m
+[31m-                required [m
+[32m+[m[32m              <input[m
+[32m+[m[32m                type={showPassword ? "text" : "password"}[m
+[32m+[m[32m                className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition"[m
+[32m+[m[32m                placeholder="••••••••"[m
+[32m+[m[32m                value={password}[m
+[32m+[m[32m                onChange={(e) => setPassword(e.target.value)}[m
+[32m+[m[32m                required[m
+               />[m
+[31m-              <button [m
+[32m+[m[32m              <button[m
+                 type="button"[m
+                 onClick={() => setShowPassword(!showPassword)}[m
+                 className="absolute inset-y-0 right-0 pr-4 flex items-center text-sm leading-5 text-slate-500 hover:text-indigo-600 transition"[m
+[36m@@ -89,4 +89,4 @@[m [mexport default function Login() {[m
+       </div>[m
+     </div>[m
+   );[m
+[31m-}[m
+\ No newline at end of file[m
+[32m+[m[32m}[m
+[1mdiff --git a/Litera_Frontend/src/views/Auth/register.jsx b/Litera_Frontend/src/views/Auth/register.jsx[m
+[1mindex d41bd39..9fc89ed 100644[m
+[1m--- a/Litera_Frontend/src/views/Auth/register.jsx[m
+[1m+++ b/Litera_Frontend/src/views/Auth/register.jsx[m
+[36m@@ -19,7 +19,7 @@[m [mexport default function Register() {[m
+ [m
+   const handleRegister = async (e) => {[m
+     e.preventDefault();[m
+[31m-    [m
+[32m+[m
+     if (nisn.length < 5) {[m
+       return;[m
+     }[m
+[36m@@ -41,35 +41,35 @@[m [mexport default function Register() {[m
+             <label className="block text-xs font-bold text-slate-600 mb-1">Nama Lengkap</label>[m
+             <input type="text" className="w-full px-4 py-2.5 rounded-xl border text-sm focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Nama lengkap sesuai rapor" value={nama} onChange={(e) => setNama(e.target.value)} required />[m
+           </div>[m
+[31m-          [m
+[32m+[m
+           <div>[m
+             <div className="flex justify-between items-center mb-1">[m
+               <label className="block text-xs font-bold text-slate-600">NISN</label>[m
+               <span className="text-[10px] font-bold text-slate-400">{nisn.length}/5</span>[m
+             </div>[m
+[31m-            <input [m
+[31m-              type="text" [m
+[32m+[m[32m            <input[m
+[32m+[m[32m              type="text"[m
+               inputMode="numeric"[m
+[31m-              className="w-full px-4 py-2.5 rounded-xl border text-sm font-mono tracking-widest focus:ring-2 focus:ring-emerald-500 outline-none" [m
+[31m-              placeholder="Masukkan 5 digit NISN" [m
+[31m-              value={nisn} [m
+[32m+[m[32m              className="w-full px-4 py-2.5 rounded-xl border text-sm font-mono tracking-widest focus:ring-2 focus:ring-emerald-500 outline-none"[m
+[32m+[m[32m              placeholder="Masukkan 5 digit NISN"[m
+[32m+[m[32m              value={nisn}[m
+               onChange={handleNisnChange} // 🔥[m
+[31m-              required [m
+[32m+[m[32m              required[m
+             />[m
+           </div>[m
+ [m
+           <div>[m
+             <label className="block text-xs font-bold text-slate-600 mb-1">Buat Password</label>[m
+             <div className="relative">[m
+[31m-              <input [m
+[32m+[m[32m              <input[m
+                 type={showPassword ? "text" : "password"} // 🔥[m
+[31m-                className="w-full pl-4 pr-12 py-2.5 rounded-xl border text-sm focus:ring-2 focus:ring-emerald-500 outline-none" [m
+[31m-                placeholder="Minimal 6 karakter" [m
+[31m-                value={password} [m
+[31m-                onChange={(e) => setPassword(e.target.value)} [m
+[31m-                required [m
+[32m+[m[32m                className="w-full pl-4 pr-12 py-2.5 rounded-xl border text-sm focus:ring-2 focus:ring-emerald-500 outline-none"[m
+[32m+[m[32m                placeholder="Minimal 6 karakter"[m
+[32m+[m[32m                value={password}[m
+[32m+[m[32m                onChange={(e) => setPassword(e.target.value)}[m
+[32m+[m[32m                required[m
+               />[m
+[31m-              <button [m
+[32m+[m[32m              <button[m
+                 type="button"[m
+                 onClick={() => setShowPassword(!showPassword)}[m
+                 className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-emerald-600 transition text-sm"[m
+[36m@@ -90,4 +90,4 @@[m [mexport default function Register() {[m
+       </div>[m
+     </div>[m
+   );[m
+[31m-}[m
+\ No newline at end of file[m
+[32m+[m[32m}[m

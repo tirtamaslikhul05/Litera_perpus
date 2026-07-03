@@ -16,20 +16,20 @@ class LoanResource extends JsonResource
     {
         return [
             'id'                => $this->id,
-            'book' => [
+            'book' => $this->relationLoaded('book') && $this->book ? [
                 'id'        => $this->book->id,
                 'nama_buku' => $this->book->nama_buku,
                 'isbn'      => $this->book->isbn,
                 'cover'     => $this->book->cover ? asset('storage/' . $this->book->cover) : null,
-            ],
-            'student' => [
+            ] : null,
+            'student' => $this->relationLoaded('user') && $this->user ? [
                 'id'      => $this->user->id,
                 'name'    => $this->user->name,
                 'nisn'    => $this->user->nisn,
                 'kelas'   => $this->user->kelas,
                 'jurusan' => $this->user->jurusan,
                 'foto'    => $this->user->foto ? asset('storage/' . $this->user->foto) : null,
-            ],
+            ] : null,
             'tanggal_pinjam'      => $this->tanggal_pinjam?->format('Y-m-d'),
             'tanggal_jatuh_tempo' => $this->tanggal_jatuh_tempo?->format('Y-m-d'),
             'tanggal_kembali'     => $this->tanggal_kembali?->format('Y-m-d'),
