@@ -15,12 +15,8 @@ export default function useFetch(serviceMethod, dependencies = []) {
     try {
       const response = await serviceMethod();
       
-      // Handle response structure dari backend ( {status, data, meta} )
-      if (response?.status === 'success') {
-        if (isMounted) setData(response.data || response);
-      } else {
-        if (isMounted) setData(response);
-      }
+      // Always return full response object — pages use response?.data consistently
+      if (isMounted) setData(response);
     } catch (err) {
       const errorMessage = err.response?.data?.message || 
                           err.message || 

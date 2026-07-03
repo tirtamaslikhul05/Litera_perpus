@@ -5,6 +5,7 @@ import BookService from '../../core/services/BookService';
 import ProfileService from '../../core/services/ProfileService';
 import FineService from '../../core/services/FineService';
 import useFetch from '../../hooks/useFetch';
+import BottomNav from '../../components/Navigation/BottomNav';
 
 export default function Overview() {
   const navigate = useNavigate();
@@ -13,12 +14,13 @@ export default function Overview() {
   const [showToast, setShowToast] = useState(false);
 
   // Fetch Data
-  const { data: user, loading: userLoading } = useFetch(() => ProfileService.getProfile());
+  const { data: userResponse, loading: userLoading } = useFetch(() => ProfileService.getProfile());
   const { data: finesData } = useFetch(() => FineService.getTotalFines());
   const { data: booksResponse, loading: booksLoading } = useFetch(() => 
     BookService.searchBooks({ per_page: 20 })
   );
 
+  const user = userResponse?.data || userResponse;
   const allBooks = booksResponse?.data || [];
 
   // Rekomendasi Buku
@@ -158,28 +160,7 @@ export default function Overview() {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 py-2.5 px-4 flex items-center justify-around z-40 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
-        <button className="flex flex-col items-center gap-1 text-[#0c3966]">
-          <div className="px-4 py-1 bg-blue-50 rounded-full">🏠</div>
-          <span className="text-[10px] font-bold">Beranda</span>
-        </button>
-        <button onClick={() => navigate('/catalog/search')} className="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600">
-          🔍
-          <span className="text-[10px]">Cari</span>
-        </button>
-        <button onClick={() => navigate('/bookshelf')} className="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600">
-          📖
-          <span className="text-[10px]">Rak</span>
-        </button>
-        <button onClick={() => navigate('/fines/fines-status')} className="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600">
-          💰
-          <span className="text-[10px]">Denda</span>
-        </button>
-        <button onClick={() => navigate('/profile')} className="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600">
-          👤
-          <span className="text-[10px]">Profil</span>
-        </button>
-      </div>
+      <BottomNav />
     </div>
   );
 }

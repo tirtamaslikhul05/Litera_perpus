@@ -1,12 +1,14 @@
 // src/views/Catalog/BookReader.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import BookService from '../../core/services/BookService';
 
 export default function BookReader() {
   const { bookId } = useParams();
+  const [searchParams] = useSearchParams();
+  const loanId = searchParams.get('loanId');
   const navigate = useNavigate();
-  
+
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -57,22 +59,28 @@ export default function BookReader() {
     return () => clearInterval(timer);
   }, [loading, book]);
 
+  const doReturnBook = async () => {
+    // Only call return when a valid loanId exists in the URL
+    // The backend StudentLoanController.returnBook($id) expects a LOAN ID, not a book ID
+    if (loanId) {
+      await BookService.returnBook(loanId);
+    }
+  };
+
   const handleAutoSaveAndExit = async () => {
     setSubmitting(true);
     try {
-      // Simpan progres (jika backend support)
-      await BookService.returnBook(bookId); // atau endpoint progres jika ada
-    } catch (e) {}
+      await doReturnBook();
+    } catch (e) { }
     setTimeout(() => navigate('/bookshelf'), 1000);
   };
 
   const handleBackAndExit = async () => {
     setSubmitting(true);
     try {
-      // Simpan progres
-      await BookService.returnBook(bookId);
+      await doReturnBook();
       setToast({ type: 'success', message: 'Progres disimpan.' });
-    } catch (err) {}
+    } catch (err) { }
     setTimeout(() => navigate('/bookshelf'), 800);
   };
 
@@ -87,7 +95,7 @@ export default function BookReader() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col font-sans">
-      
+
       {toast && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-slate-800 text-white text-sm shadow-lg">
           {toast.message}
@@ -96,14 +104,14 @@ export default function BookReader() {
 
       {/* Header */}
       <header className="bg-white px-6 py-3 flex items-center justify-between border-b sticky top-0 z-20">
-        <button 
+        <button
           onClick={handleBackAndExit}
           disabled={submitting}
           className="text-[#0c3966] font-bold"
         >
           ← Kembali
         </button>
-        
+
         <div className="text-center">
           <h1 className="text-sm font-bold text-[#0c3966]">{book.nama_buku}</h1>
           <p className="text-[10px] text-slate-400">Halaman {currentPage}</p>
@@ -121,17 +129,17 @@ export default function BookReader() {
             <div>
               <p className="mb-8">Halaman {currentPage}</p>
               <p className="italic opacity-70">"Konten buku akan muncul di sini. Ini adalah tampilan pembaca sederhana."</p>
-              <img 
-                src={book.cover} 
-                alt={book.nama_buku} 
-                className="mx-auto mt-10 w-48 opacity-30" 
+              <img
+                src={book.cover}
+                alt={book.nama_buku}
+                className="mx-auto mt-10 w-48 opacity-30"
               />
             </div>
           </div>
 
           {/* Navigation */}
           <div className="flex justify-between items-center pt-8 border-t mt-auto">
-            <button 
+            <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               className="px-5 py-2 text-xs font-bold border rounded-xl hover:bg-slate-50"
               disabled={currentPage === 1}
@@ -143,7 +151,7 @@ export default function BookReader() {
               {currentPage} / {book.totalPages || '?'}
             </span>
 
-            <button 
+            <button
               onClick={() => setCurrentPage(p => p + 1)}
               className="px-5 py-2 text-xs font-bold border rounded-xl hover:bg-slate-50"
             >

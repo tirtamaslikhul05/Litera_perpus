@@ -7,6 +7,7 @@ import {
   BookOpen,
   BookMarked,
   Wallet,
+  Clock,
   LogOut,
   Plus,
   ArrowLeft,
@@ -19,7 +20,8 @@ export default function ManageBooks() {
   const navigate = useNavigate();
 
   const [books, setBooks] = useState([]);
-  const [viewMode, setViewMode] = useState("list"); // 'list' | 'add'
+  const [viewMode, setViewMode] = useState("list"); // 'list' | 'add' | 'edit'
+  const [editBook, setEditBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -42,6 +44,23 @@ export default function ManageBooks() {
   useEffect(() => {
     fetchBooks();
   }, []);
+
+  const handleEdit = (book) => {
+    setEditBook(book);
+    setViewMode("edit");
+  };
+
+  const handleDelete = async (bookId, namaBuku) => {
+    if (!window.confirm(`Hapus buku "${namaBuku}" secara permanen? Aksi ini tidak bisa dibatalkan.`)) return;
+
+    try {
+      await AdminService.deleteBook(bookId);
+      alert("✅ Buku berhasil dihapus!");
+      fetchBooks();
+    } catch (err) {
+      alert("Gagal menghapus buku.");
+    }
+  };
 
   const handleLogout = () => {
     if (window.confirm("Keluar dari sesi admin?")) {
@@ -79,6 +98,27 @@ export default function ManageBooks() {
               <Users className="w-4 h-4" />
               Kelola Siswa
             </button>
+            <button
+              onClick={() => navigate("/admin/loans")}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all text-left"
+            >
+              <Clock className="w-4 h-4" />
+              Peminjaman
+            </button>
+            <button
+              onClick={() => navigate("/admin/returns")}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all text-left"
+            >
+              <BookMarked className="w-4 h-4" />
+              Pengembalian
+            </button>
+            <button
+              onClick={() => navigate("/admin/fines")}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all text-left"
+            >
+              <Wallet className="w-4 h-4" />
+              Denda
+            </button>
           </nav>
         </div>
 
@@ -107,7 +147,7 @@ export default function ManageBooks() {
 
           {viewMode === "list" ? (
             <button
-              onClick={() => setViewMode("add")}
+              onClick={() => { setViewMode("add"); setEditBook(null); }}
               className="bg-[#2563eb] hover:bg-blue-600 text-white font-semibold text-sm px-5 py-2.5 rounded-xl flex items-center gap-2 transition"
             >
               <Plus className="w-4 h-4" />
@@ -115,7 +155,7 @@ export default function ManageBooks() {
             </button>
           ) : (
             <button
-              onClick={() => setViewMode("list")}
+              onClick={() => { setViewMode("list"); setEditBook(null); }}
               className="border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-sm px-5 py-2.5 rounded-xl flex items-center gap-2 transition"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -126,6 +166,12 @@ export default function ManageBooks() {
 
         {viewMode === "add" ? (
           <AddBookForm onSaveSuccess={() => { setViewMode("list"); fetchBooks(); }} />
+        ) : viewMode === "edit" ? (
+          <AddBookForm
+            key={editBook?.id}
+            editBook={editBook}
+            onSaveSuccess={() => { setViewMode("list"); setEditBook(null); fetchBooks(); }}
+          />
         ) : loading ? (
           <div className="text-center py-20">Memuat daftar buku...</div>
         ) : error ? (
@@ -151,6 +197,22 @@ export default function ManageBooks() {
                 <p className="text-xs mt-3 text-emerald-600 font-medium">
                   Tersedia: {book.jumlah_tersedia}
                 </p>
+
+                {/* Action Buttons */}
+                <div className="mt-4 pt-4 border-t flex gap-2">
+                  <button
+                    onClick={() => handleEdit(book)}
+                    className="flex-1 bg-[#2563eb] hover:bg-blue-600 text-white py-2 rounded-lg text-xs font-bold transition"
+                  >
+                    ✏️ Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(book.id, book.nama_buku)}
+                    className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-xs font-bold transition"
+                  >
+                    🗑️ Hapus
+                  </button>
+                </div>
               </div>
             ))}
           </div>

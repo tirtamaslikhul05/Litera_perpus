@@ -1,13 +1,14 @@
 // src/views/Admin/ManageStudents.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Users, 
-  BookOpen, 
-  BookMarked, 
-  Wallet, 
-  LogOut 
+import {
+  LayoutDashboard,
+  Users,
+  BookOpen,
+  BookMarked,
+  Wallet,
+  Clock,
+  LogOut
 } from 'lucide-react';
 import AdminService from '../../core/services/AdminService';
 import AuthService from '../../core/services/AuthService';
@@ -15,7 +16,7 @@ import AddStudentModal from './AddStudentModal';
 
 export default function ManageStudents() {
   const navigate = useNavigate();
-  
+
   const [students, setStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,7 +27,7 @@ export default function ManageStudents() {
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await AdminService.getAllStudents({});
       setStudents(response.data || response || []);
     } catch (err) {
@@ -48,11 +49,11 @@ export default function ManageStudents() {
 
     try {
       await AdminService.toggleStudentStatus(studentId);
-      
+
       // Optimistic update
-      setStudents(prev => prev.map(student => 
-        student.id === studentId 
-          ? { ...student, status: currentStatus === 'Aktif' ? 'Nonaktif' : 'Aktif' } 
+      setStudents(prev => prev.map(student =>
+        student.id === studentId
+          ? { ...student, status: currentStatus === 'Aktif' ? 'Nonaktif' : 'Aktif' }
           : student
       ));
     } catch (err) {
@@ -75,7 +76,7 @@ export default function ManageStudents() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] font-sans flex text-slate-800">
-      
+
       {/* Sidebar */}
       <aside className="w-64 bg-[#02244d] text-white flex flex-col justify-between shrink-0 shadow-xl">
         <div>
@@ -96,6 +97,10 @@ export default function ManageStudents() {
             <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold bg-[#2563eb] text-white transition-all text-left">
               <Users className="w-4 h-4" />
               Kelola Siswa
+            </button>
+            <button onClick={() => navigate('/admin/loans')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all text-left">
+              <Clock className="w-4 h-4" />
+              Peminjaman
             </button>
             <button onClick={() => navigate('/admin/returns')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all text-left">
               <BookMarked className="w-4 h-4" />
@@ -123,7 +128,7 @@ export default function ManageStudents() {
             <h2 className="text-2xl font-bold text-slate-900">Kelola Data Siswa</h2>
             <p className="text-sm text-slate-500">Manajemen akun siswa perpustakaan</p>
           </div>
-          <button 
+          <button
             onClick={() => setIsModalOpen(true)}
             className="bg-[#2563eb] hover:bg-blue-600 text-white font-bold text-sm px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-sm transition"
           >
@@ -133,9 +138,9 @@ export default function ManageStudents() {
 
         {/* Search */}
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm max-w-md">
-          <input 
-            type="text" 
-            placeholder="Cari nama atau NISN..." 
+          <input
+            type="text"
+            placeholder="Cari nama atau NISN..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full bg-slate-50 pl-4 pr-4 py-3 border border-transparent rounded-xl text-sm focus:outline-none focus:bg-white focus:border-slate-200"
@@ -172,20 +177,18 @@ export default function ManageStudents() {
                         <td className="p-5">{student.kelas}</td>
                         <td className="p-5">{student.jurusan}</td>
                         <td className="p-5">
-                          <span className={`inline-block px-3 py-1 text-xs font-bold rounded-full ${
-                            student.status === 'Aktif' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
-                          }`}>
+                          <span className={`inline-block px-3 py-1 text-xs font-bold rounded-full ${student.status === 'Aktif' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+                            }`}>
                             {student.status || 'Aktif'}
                           </span>
                         </td>
                         <td className="p-5 text-center">
-                          <button 
+                          <button
                             onClick={() => handleToggleStatus(student.id, student.status)}
-                            className={`text-xs font-bold px-4 py-2 rounded-lg border transition ${
-                              student.status === 'Aktif' 
-                                ? 'border-rose-200 text-rose-600 hover:bg-rose-50' 
+                            className={`text-xs font-bold px-4 py-2 rounded-lg border transition ${student.status === 'Aktif'
+                                ? 'border-rose-200 text-rose-600 hover:bg-rose-50'
                                 : 'border-emerald-200 text-emerald-600 hover:bg-emerald-50'
-                            }`}
+                              }`}
                           >
                             {student.status === 'Aktif' ? 'Bekukan' : 'Aktifkan'}
                           </button>
@@ -201,10 +204,10 @@ export default function ManageStudents() {
       </div>
 
       {/* Modal Tambah Siswa */}
-      <AddStudentModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSuccess={fetchStudents} 
+      <AddStudentModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={fetchStudents}
       />
     </div>
   );

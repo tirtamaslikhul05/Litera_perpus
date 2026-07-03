@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BookService from '../../core/services/BookService';
 import useFetch from '../../hooks/useFetch';
+import BottomNav from '../../components/Navigation/BottomNav';
 
 export default function ReturnStatus() {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ export default function ReturnStatus() {
 
   // Fetch hanya pinjaman yang sudah approved (bisa dikembalikan)
   const { data: response, loading, refresh } = useFetch(
-    () => BookService.getMyLoans('approved'), 
+    () => BookService.getMyLoans('approved'),
     []
   );
 
@@ -28,7 +29,7 @@ export default function ReturnStatus() {
 
     try {
       await BookService.returnBook(loan.id);
-      
+
       showToast('✅ Buku berhasil dikembalikan!', 'success');
       refresh(); // Refresh daftar otomatis
     } catch (err) {
@@ -38,10 +39,10 @@ export default function ReturnStatus() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] pb-24 text-slate-800 font-sans">
-      
+
       <nav className="bg-white px-6 py-4 flex items-center justify-between sticky top-0 z-20 shadow-sm border-b">
-        <span 
-          onClick={() => navigate('/dashboard')} 
+        <span
+          onClick={() => navigate('/dashboard')}
           className="text-xl font-bold text-[#0c3966] tracking-wide cursor-pointer"
         >
           Litera
@@ -49,7 +50,7 @@ export default function ReturnStatus() {
       </nav>
 
       <div className="max-w-6xl mx-auto px-6 pt-6 space-y-6">
-        
+
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-2xl">📚</div>
           <div>
@@ -71,10 +72,10 @@ export default function ReturnStatus() {
               return (
                 <div key={loan.id} className="bg-white border border-slate-100 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-5">
                   <div className="w-16 h-20 bg-slate-100 rounded-lg overflow-hidden border flex-shrink-0">
-                    <img 
-                      src={book.cover} 
-                      alt={book.nama_buku} 
-                      className="w-full h-full object-cover" 
+                    <img
+                      src={book.cover}
+                      alt={book.nama_buku}
+                      className="w-full h-full object-cover"
                     />
                   </div>
 
@@ -84,7 +85,7 @@ export default function ReturnStatus() {
                     <p className="text-xs text-amber-600">Jatuh tempo: {loan.tanggal_jatuh_tempo}</p>
                   </div>
 
-                  <button 
+                  <button
                     onClick={() => handleReturnBook(loan)}
                     className="bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-6 rounded-xl text-sm font-bold transition w-full sm:w-auto"
                   >
@@ -96,6 +97,9 @@ export default function ReturnStatus() {
           </div>
         )}
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNav />
     </div>
   );
 }

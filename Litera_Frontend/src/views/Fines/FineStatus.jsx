@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import BookService from '../../core/services/BookService';
 import FineService from '../../core/services/FineService';
 import useFetch from '../../hooks/useFetch';
+import BottomNav from '../../components/Navigation/BottomNav';
 
 export default function FinesStatus() {
   const navigate = useNavigate();
@@ -98,6 +99,9 @@ export default function FinesStatus() {
           <p>Hubungi petugas perpustakaan di meja admin untuk melunasi denda Anda.</p>
         </div>
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNav />
     </div>
   );
 }

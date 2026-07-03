@@ -7,6 +7,7 @@ import {
   BookOpen,
   BookMarked,
   Wallet,
+  Clock,
   LogOut,
 } from "lucide-react";
 import AdminService from '../../core/services/AdminService';
@@ -125,6 +126,14 @@ export default function DashboardAdmin() {
             >
               <Users className="w-4 h-4" />
               Kelola Siswa
+            </button>
+
+            <button
+              onClick={() => navigate("/admin/loans")}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white transition-all"
+            >
+              <Clock className="w-4 h-4" />
+              Peminjaman
             </button>
 
             <button

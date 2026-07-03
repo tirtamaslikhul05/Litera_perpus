@@ -29,14 +29,15 @@ class AdminLoanController extends Controller
             $query->where('status', $request->status);
         }
 
-        // Pencarian: ?search=nama_buku atau nama_siswa
+        // Pencarian: ?search=nama_buku, nama_siswa, atau NISN
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->whereHas('book', function ($q) use ($search) {
                     $q->where('nama_buku', 'like', "%{$search}%");
                 })->orWhereHas('user', function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%");
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('nisn', 'like', "%{$search}%");
                 });
             });
         }
@@ -110,6 +111,42 @@ class AdminLoanController extends Controller
         return response()->json([
             'status'  => 'success',
             'message' => 'Peminjaman berhasil disetujui.',
+            'data'    => new LoanResource($loan->fresh()->load(['book', 'user'])),
+        ]);
+    }
+
+    /**
+     * PUT /api/admin/loans/{loan}/reject
+     * Menolak peminjaman buku oleh siswa.
+     * Mengubah status dari 'pending' → 'rejected'.
+     */
+    public function reject($id)
+    {
+        $loan = Loan::with('book')
+                    ->where('school_id', auth()->user()->school_id)
+                    ->find($id);
+
+        if (!$loan) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Peminjaman tidak ditemukan.',
+            ], 404);
+        }
+
+        if ($loan->status !== 'pending') {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Peminjaman sudah diproses sebelumnya.',
+            ], 422);
+        }
+
+        $loan->update([
+            'status' => 'rejected',
+        ]);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Peminjaman berhasil ditolak.',
             'data'    => new LoanResource($loan->fresh()->load(['book', 'user'])),
         ]);
     }

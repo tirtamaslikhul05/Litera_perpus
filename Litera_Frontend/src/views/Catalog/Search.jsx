@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BookService from '../../core/services/BookService';
 import useFetch from '../../hooks/useFetch';
+import BottomNav from '../../components/Navigation/BottomNav';
 
 export default function Search() {
   const navigate = useNavigate();
@@ -11,8 +12,8 @@ export default function Search() {
   const [selectedGenre, setSelectedGenre] = useState('Semua Buku');
   const [toast, setToast] = useState(null);
 
-  // Fetch buku dari API
-  const { data: booksResponse, loading } = useFetch(
+  // Fetch buku dari API — now useFetch returns full {status, data, meta} object
+  const { data: booksResponse, loading, error } = useFetch(
     () => BookService.searchBooks({ search: keyword, per_page: 30 }), 
     [keyword]
   );
@@ -21,13 +22,14 @@ export default function Search() {
 
   const genres = ['Semua Buku', 'Self-Development', 'History', 'Psychology', 'Fiksi Ilmiah', 'Sastra'];
 
-  // Filter client-side (genre)
+  // Filter client-side (genre) — kategori field comes from backend metadata
   const filteredBooks = allBooks.filter(book => {
     const matchesKeyword = 
       book.nama_buku?.toLowerCase().includes(keyword.toLowerCase()) || 
       book.isbn?.toLowerCase().includes(keyword.toLowerCase());
 
-    const matchesGenre = selectedGenre === 'Semua Buku';
+    const matchesGenre = selectedGenre === 'Semua Buku' || 
+      (book.kategori && book.kategori.toLowerCase() === selectedGenre.toLowerCase());
 
     return matchesKeyword && matchesGenre;
   });
@@ -108,8 +110,16 @@ export default function Search() {
         {/* Books Grid */}
         {loading ? (
           <div className="text-center py-12">Memuat buku...</div>
+        ) : error ? (
+          <div className="text-center py-12 text-red-500">
+            Gagal memuat data: {error}
+          </div>
         ) : filteredBooks.length === 0 ? (
-          <div className="text-center py-12 text-slate-400">Tidak ada buku yang ditemukan.</div>
+          <div className="text-center py-12 text-slate-400">
+            {keyword
+              ? `Tidak ada buku yang cocok dengan "${keyword}".`
+              : 'Tidak ada buku yang ditemukan.'}
+          </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredBooks.map((book) => (
@@ -155,6 +165,9 @@ export default function Search() {
           </div>
         )}
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNav />
     </div>
   );
 }

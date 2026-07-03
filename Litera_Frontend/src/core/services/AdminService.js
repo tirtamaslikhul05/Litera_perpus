@@ -70,19 +70,22 @@ const AdminService = {
   },
 
   // ================= PEMINJAMAN (LOANS) =================
-  async getAllLoans({ status = null, search = "" }) {
-    let url = "/admin/loans";
-    const params = [];
-    if (status) params.push(`status=${status}`);
-    if (search) params.push(`search=${search}`);
-    if (params.length) url += "?" + params.join("&");
+  async getAllLoans({ status = null, search = "", per_page = 10 }) {
+    const params = { per_page };
+    if (status) params.status = status;
+    if (search) params.search = search;
 
-    const res = await apiClient.get(url);
+    const res = await apiClient.get("/admin/loans", { params });
     return res.data;
   },
 
   async approveLoan(loanId) {
     const res = await apiClient.put(`/admin/loans/${loanId}/approve`);
+    return res.data;
+  },
+
+  async rejectLoan(loanId) {
+    const res = await apiClient.put(`/admin/loans/${loanId}/reject`);
     return res.data;
   },
 

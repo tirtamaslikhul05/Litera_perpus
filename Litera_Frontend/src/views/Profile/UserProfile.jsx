@@ -4,12 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import ProfileService from '../../core/services/ProfileService';
 import AuthService from '../../core/services/AuthService';
 import useFetch from '../../hooks/useFetch';
+import BottomNav from '../../components/Navigation/BottomNav';
 
 export default function UserProfile() {
   const navigate = useNavigate();
   
-  // Fetch profil siswa
-  const { data: user, loading } = useFetch(() => ProfileService.getProfile());
+  // Fetch profil siswa — useFetch now returns full {status, data} so extract .data
+  const { data: userResponse, loading } = useFetch(() => ProfileService.getProfile());
+  const user = userResponse?.data || userResponse;
 
   const handleLogout = async () => {
     if (!window.confirm('Apakah Anda yakin ingin keluar?')) return;
@@ -85,6 +87,9 @@ export default function UserProfile() {
           </button>
         </div>
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNav />
     </div>
   );
 }

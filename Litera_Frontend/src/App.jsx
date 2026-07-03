@@ -24,6 +24,7 @@ import ManageBook from './views/Admin/ManageBook';
 import ManageStudent from './views/Admin/ManageStudent';
 import BookReturns from './views/Admin/BookReturns';
 import ManageFinnes from './views/Admin/ManageFinnes';
+import ManageLoans from './views/Admin/ManageLoans';
 
 export default function App() {
   return (
@@ -145,6 +146,15 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/admin/loans"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <ManageLoans />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/admin/fines"
           element={

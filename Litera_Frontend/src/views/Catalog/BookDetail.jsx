@@ -3,12 +3,13 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import BookService from '../../core/services/BookService';
 import useFetch from '../../hooks/useFetch';
+import BottomNav from '../../components/Navigation/BottomNav';
 
 export default function BookDetail() {
   const { bookId } = useParams();
   const navigate = useNavigate();
   
-  const [formatBuku, setFormatBuku] = useState('fisik'); // default fisik
+  const [formatBuku, setFormatBuku] = useState('fisik');
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState(null);
 
@@ -18,6 +19,7 @@ export default function BookDetail() {
     [bookId]
   );
 
+  // useFetch now returns full {status, data, meta} — extract the book object
   const book = bookResponse?.data || bookResponse;
 
   const showToast = (message, type = 'success') => {
@@ -64,7 +66,7 @@ export default function BookDetail() {
   const isAvailable = book.jumlah_tersedia > 0;
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] pb-12 text-slate-800 font-sans">
+    <div className="min-h-screen bg-[#f8fafc] pb-24 text-slate-800 font-sans">
       {toast && (
         <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-lg text-sm font-medium transition-all ${
           toast.type === 'error' ? 'bg-red-600 text-white' : 'bg-[#0c3966] text-white'
@@ -139,6 +141,9 @@ export default function BookDetail() {
           </button>
         </div>
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNav />
     </div>
   );
 }

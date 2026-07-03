@@ -1,10 +1,13 @@
 // src/views/Admin/AddBookForm.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminService from '../../core/services/AdminService';
 
-export default function AddBookForm({ onSaveSuccess }) {
-  const [entryMode, setEntryMode] = useState("auto"); // 'auto' | 'manual'
-  const [jenisBuku, setJenisBuku] = useState("E-Book");
+export default function AddBookForm({ onSaveSuccess, editBook = null }) {
+  const isEditing = editBook !== null;
+  const [entryMode, setEntryMode] = useState(isEditing ? "manual" : "auto");
+  const [jenisBuku, setJenisBuku] = useState(
+    editBook?.pdf ? "E-Book" : "Buku Fisik"
+  );
 
   const [formData, setFormData] = useState({
     nama_buku: "",
@@ -20,6 +23,23 @@ export default function AddBookForm({ onSaveSuccess }) {
   const [pdfFile, setPdfFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  // Pre-populate form when editing
+  useEffect(() => {
+    if (editBook) {
+      setFormData({
+        nama_buku: editBook.nama_buku || "",
+        isbn: editBook.isbn || "",
+        kategori: editBook.kategori || "",
+        penulis: editBook.penulis || "",
+        penerbit: editBook.penerbit || "",
+        tahun_terbit: editBook.tahun_terbit || "",
+        jumlah_buku: editBook.jumlah_buku || 1,
+      });
+      setJenisBuku(editBook.pdf ? "E-Book" : "Buku Fisik");
+      setEntryMode("manual"); // Always manual mode for editing
+    }
+  }, [editBook]);
 
   const updateField = (field) => (e) => {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
@@ -38,6 +58,7 @@ export default function AddBookForm({ onSaveSuccess }) {
     setCoverFile(null);
     setPdfFile(null);
     setJenisBuku("E-Book");
+    setEntryMode("auto");
     setError("");
   };
 
@@ -67,13 +88,20 @@ export default function AddBookForm({ onSaveSuccess }) {
       if (coverFile) data.append("cover", coverFile);
       if (pdfFile) data.append("pdf_file", pdfFile);
 
-      await AdminService.createBook(data);
+      if (isEditing) {
+        // UPDATE existing book
+        await AdminService.updateBook(editBook.id, data);
+        alert("✅ Buku berhasil diperbarui!");
+      } else {
+        // CREATE new book
+        await AdminService.createBook(data);
+        resetForm();
+        alert("✅ Buku berhasil ditambahkan ke katalog!");
+      }
 
-      alert("✅ Buku berhasil ditambahkan ke katalog!");
-      resetForm();
       onSaveSuccess?.();
     } catch (err) {
-      setError(err.message || "Gagal menyimpan buku.");
+      setError(err?.response?.data?.message || err.message || "Gagal menyimpan buku.");
     } finally {
       setSubmitting(false);
     }
@@ -82,7 +110,18 @@ export default function AddBookForm({ onSaveSuccess }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-bold">Tambah Buku Baru</h3>
+        <h3 className="text-lg font-bold">
+          {isEditing ? 'Edit Buku' : 'Tambah Buku Baru'}
+        </h3>
+        {isEditing && (
+          <button
+            type="button"
+            onClick={() => onSaveSuccess?.()}
+            className="text-xs text-slate-400 hover:text-slate-600 underline"
+          >
+            Kembali
+          </button>
+        )}
       </div>
 
       {/* ===== ENTRY MODE TOGGLE ===== */}
@@ -90,22 +129,20 @@ export default function AddBookForm({ onSaveSuccess }) {
         <button
           type="button"
           onClick={() => setEntryMode("auto")}
-          className={`flex-1 py-2 text-sm font-semibold rounded-md transition-all duration-200 ${
-            entryMode === "auto"
+          className={`flex-1 py-2 text-sm font-semibold rounded-md transition-all duration-200 ${entryMode === "auto"
               ? "bg-white text-[#0c3966] shadow-sm"
               : "text-gray-500 hover:text-gray-700"
-          }`}
+            }`}
         >
           Lengkap + File
         </button>
         <button
           type="button"
           onClick={() => setEntryMode("manual")}
-          className={`flex-1 py-2 text-sm font-semibold rounded-md transition-all duration-200 ${
-            entryMode === "manual"
+          className={`flex-1 py-2 text-sm font-semibold rounded-md transition-all duration-200 ${entryMode === "manual"
               ? "bg-white text-[#0c3966] shadow-sm"
               : "text-gray-500 hover:text-gray-700"
-          }`}
+            }`}
         >
           Manual (Isi Cepat)
         </button>
@@ -130,11 +167,10 @@ export default function AddBookForm({ onSaveSuccess }) {
                   key={type}
                   type="button"
                   onClick={() => setJenisBuku(type)}
-                  className={`px-5 py-2 rounded-xl text-sm font-medium border transition ${
-                    jenisBuku === type
+                  className={`px-5 py-2 rounded-xl text-sm font-medium border transition ${jenisBuku === type
                       ? "bg-[#0c3966] text-white"
                       : "border-slate-200 hover:bg-slate-50"
-                  }`}
+                    }`}
                 >
                   {type}
                 </button>
@@ -289,7 +325,11 @@ export default function AddBookForm({ onSaveSuccess }) {
             disabled={submitting}
             className="w-full bg-[#0c3966] hover:bg-[#092a4d] text-white font-bold py-3 rounded-xl transition disabled:opacity-60"
           >
-            {submitting ? "Menyimpan..." : "Simpan Buku ke Katalog"}
+            {submitting
+              ? "Menyimpan..."
+              : isEditing
+                ? "Perbarui Buku"
+                : "Simpan Buku ke Katalog"}
           </button>
         </div>
       </form>

@@ -3,11 +3,12 @@ import apiClient from "./ApiClient";
 const BookService = {
   async searchBooks({
     search = "",
-    tersedia = true,
+    tersedia = null,
     pdf = null,
     per_page = 12,
   }) {
-    const params = { search, tersedia, per_page };
+    const params = { search, per_page };
+    if (tersedia !== null) params.tersedia = tersedia;
     if (pdf !== null) params.pdf = pdf;
     const res = await apiClient.get("/student/books", { params });
     return res.data;

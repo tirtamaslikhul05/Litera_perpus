@@ -7,6 +7,7 @@ import {
   BookOpen,
   BookMarked,
   Wallet,
+  Clock,
   LogOut,
 } from "lucide-react";
 import AdminService from '../../core/services/AdminService';
@@ -29,13 +30,20 @@ export default function BookReturns() {
       setError("");
       setActiveLoan(null);
 
-      const response = await AdminService.getAllLoans({ search: searchQuery });
-      const loans = response.data || response;
+      // Only search approved loans (ones that can be returned)
+      const response = await AdminService.getAllLoans({
+        search: searchQuery,
+        status: 'approved',
+        per_page: 100  // Return as many results as possible to find the match
+      });
+
+      // response = { status: 'success', data: [...], meta: {...} }
+      const loans = response.data || [];
 
       if (loans && loans.length > 0) {
         setActiveLoan(loans[0]); // Ambil yang pertama
       } else {
-        setError("Peminjaman tidak ditemukan.");
+        setError("Peminjaman aktif tidak ditemukan untuk siswa tersebut.");
       }
     } catch (err) {
       setError("Gagal mencari data peminjaman.");
@@ -50,7 +58,7 @@ export default function BookReturns() {
 
     if (
       !window.confirm(
-        `Konfirmasi pengembalian buku "${activeLoan.book?.nama_buku}"?`,
+        `Konfirmasi pengembalian buku "${activeLoan.book?.nama_buku}" oleh ${activeLoan.student?.name}?`,
       )
     )
       return;
@@ -105,6 +113,13 @@ export default function BookReturns() {
             >
               <Users className="w-4 h-4" />
               Kelola Siswa
+            </button>
+            <button
+              onClick={() => navigate("/admin/loans")}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all text-left"
+            >
+              <Clock className="w-4 h-4" />
+              Peminjaman
             </button>
             <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold bg-[#2563eb] text-white transition-all text-left">
               <BookMarked className="w-4 h-4" />
@@ -163,7 +178,7 @@ export default function BookReturns() {
           </button>
         </form>
 
-        {error && <div className="text-red-500 text-center">{error}</div>}
+        {error && <div className="text-red-500 text-center text-sm">{error}</div>}
 
         {/* Detail Pinjaman */}
         {activeLoan && (
@@ -174,18 +189,30 @@ export default function BookReturns() {
               <div>
                 <p className="text-slate-500 text-xs">Siswa</p>
                 <p className="font-medium">
-                  {activeLoan.student?.name || activeLoan.student_name}
+                  {activeLoan.student?.name || 'Tidak diketahui'}
                 </p>
+                {activeLoan.student?.nisn && (
+                  <p className="text-xs text-slate-400">NISN: {activeLoan.student.nisn}</p>
+                )}
+                {activeLoan.student?.kelas && (
+                  <p className="text-xs text-slate-400">
+                    {activeLoan.student.kelas} • {activeLoan.student.jurusan || ''}
+                  </p>
+                )}
               </div>
               <div>
                 <p className="text-slate-500 text-xs">Buku</p>
                 <p className="font-medium">
-                  {activeLoan.book?.nama_buku || activeLoan.book_name}
+                  {activeLoan.book?.nama_buku || 'Tidak diketahui'}
                 </p>
               </div>
               <div>
                 <p className="text-slate-500 text-xs">Tanggal Pinjam</p>
-                <p>{activeLoan.tanggal_pinjam}</p>
+                <p>{activeLoan.tanggal_pinjam || '-'}</p>
+              </div>
+              <div>
+                <p className="text-slate-500 text-xs">Jatuh Tempo</p>
+                <p>{activeLoan.tanggal_jatuh_tempo || '-'}</p>
               </div>
             </div>
 
