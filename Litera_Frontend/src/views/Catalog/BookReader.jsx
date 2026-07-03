@@ -1,7 +1,7 @@
 // src/views/Catalog/BookReader.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import BookService from '../../services/BookService';
+import BookService from '../../core/services/BookService';
 
 export default function BookReader() {
   const { bookId } = useParams();

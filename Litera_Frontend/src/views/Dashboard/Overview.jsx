@@ -1,9 +1,9 @@
 // src/views/Dashboard/Overview.jsx
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BookService from '../../services/BookService';
-import ProfileService from '../../services/ProfileService';
-import FineService from '../../services/FineService';
+import BookService from '../../core/services/BookService';
+import ProfileService from '../../core/services/ProfileService';
+import FineService from '../../core/services/FineService';
 import useFetch from '../../hooks/useFetch';
 
 export default function Overview() {

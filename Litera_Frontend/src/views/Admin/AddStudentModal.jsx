@@ -1,6 +1,6 @@
 // src/views/Admin/AddStudentModal.jsx
 import React, { useState } from "react";
-import AdminService from "../../services/AdminService";
+import AdminService from '../../core/services/AdminService';
 
 export default function AddStudentModal({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState({

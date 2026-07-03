@@ -1,6 +1,6 @@
 // src/views/Admin/AddBookForm.jsx
 import React, { useState } from "react";
-import AdminService from "../../services/AdminService";
+import AdminService from '../../core/services/AdminService';
 
 export default function AddBookForm({ onSaveSuccess }) {
   const [jenisBuku, setJenisBuku] = useState("E-Book");

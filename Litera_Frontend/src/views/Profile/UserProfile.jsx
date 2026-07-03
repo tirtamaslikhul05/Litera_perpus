@@ -1,8 +1,8 @@
 // src/views/Profile/UserProfile.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import ProfileService from '../../services/ProfileService';
-import AuthService from '../../services/AuthService';
+import ProfileService from '../../core/services/ProfileService';
+import AuthService from '../../core/services/AuthService';
 import useFetch from '../../hooks/useFetch';
 
 export default function UserProfile() {

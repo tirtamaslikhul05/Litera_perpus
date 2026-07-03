@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { BookOpen, User, IdCard, Mail, Lock, RefreshCw, ArrowRight } from 'lucide-react';
-import AuthService from '../../services/AuthService';
+import AuthService from '../../core/services/AuthService';
 
 export default function Register() {
   const navigate = useNavigate();

@@ -10,7 +10,7 @@ import {
   ArrowRight,
   ShieldCheck,
 } from "lucide-react";
-import AuthService from "../../services/AuthService";
+import AuthService from '../../core/services/AuthService';
 
 export default function RegisterAdmin() {
   const navigate = useNavigate();

@@ -1,8 +1,8 @@
 // src/views/Catalog/Bookshelf.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BookService from '../../services/BookService';
-import FineService from '../../services/FineService';
+import BookService from '../../core/services/BookService';
+import FineService from '../../core/services/FineService';
 import useFetch from '../../hooks/useFetch';
 
 export default function Bookshelf() {

@@ -1,7 +1,7 @@
 // src/components/Protection/ProtectedRoute.jsx
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import AuthService from '../../services/AuthService';
+import AuthService from '../../core/services/AuthService';
 
 export default function ProtectedRoute({ children, allowedRoles }) {
   const [isLoading, setIsLoading] = useState(true);

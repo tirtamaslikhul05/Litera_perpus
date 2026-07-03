@@ -11,8 +11,8 @@ import {
   Plus,
   ArrowLeft,
 } from "lucide-react";
-import AdminService from "../../services/AdminService";
-import AuthService from "../../services/AuthService";
+import AdminService from '../../core/services/AdminService';
+import AuthService from '../../core/services/AuthService';
 
 export default function ManageBooks() {
   const navigate = useNavigate();

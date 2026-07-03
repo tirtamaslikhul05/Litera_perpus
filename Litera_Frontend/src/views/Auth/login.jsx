@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { BookOpen, LogIn, Lock, Eye, EyeOff, IdCard, ShieldCheck } from 'lucide-react';
-import AuthService from '../core/services/AuthService';
+import AuthService from '../../core/services/AuthService';
 import useAuth from '../../hooks/useAuth';   // optional, jika pakai custom hook
 
 export default function Login() {

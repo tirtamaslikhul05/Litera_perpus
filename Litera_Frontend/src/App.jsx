@@ -20,10 +20,10 @@ import UserProfile from './views/Profile/UserProfile';
 import LoginAdmin from './views/Admin/LoginAdmin';
 import RegisterAdmin from './views/Admin/RegisterAdmin';
 import DashboardAdmin from './views/Admin/DashboardAdmin';
-import ManageBooks from './views/Admin/ManageBooks';
-import ManageStudents from './views/Admin/ManageStudents';
+import ManageBook from './views/Admin/ManageBook';
+import ManageStudent from './views/Admin/ManageStudent';
 import BookReturns from './views/Admin/BookReturns';
-import ManageFines from './views/Admin/ManageFines';
+import ManageFinnes from './views/Admin/ManageFinnes';
 
 
 export default function App() {
@@ -115,7 +115,7 @@ export default function App() {
           path="/admin/students" 
           element={
             <ProtectedRoute allowedRoles={['Admin']}>
-              <ManageStudents />
+              <ManageStudent />
             </ProtectedRoute>
           } 
         />
@@ -133,7 +133,7 @@ export default function App() {
           path="/admin/books" 
           element={
             <ProtectedRoute allowedRoles={['Admin']}>
-              <ManageBooks />
+              <ManageBook />
             </ProtectedRoute>
           } 
         />
@@ -151,7 +151,7 @@ export default function App() {
           path="/admin/fines" 
           element={
             <ProtectedRoute allowedRoles={['Admin']}>
-              <ManageFines />
+              <ManageFinnes />
             </ProtectedRoute>
           } 
         />

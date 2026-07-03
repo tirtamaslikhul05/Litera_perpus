@@ -1,7 +1,7 @@
 // src/views/Fines/ReturnStatus.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BookService from '../../services/BookService';
+import BookService from '../../core/services/BookService';
 import useFetch from '../../hooks/useFetch';
 
 export default function ReturnStatus() {
